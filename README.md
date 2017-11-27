@@ -8,6 +8,18 @@ Tensorflow implementation of [Curriculum Adaptive Sampling for Extreme Data Imba
 * See `main.py` for other arguments.
 
 ## Idea
+### Preprocessing
+* Hounsfield
+```python
+minHU = -1000
+maxHU = 400
+```
+
+* Resample
+```python
+1.25mm
+```
+
 ### Network Architecture
 ![network](./assests/network.JPG)
 
