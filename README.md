@@ -11,13 +11,13 @@ Tensorflow implementation of [Curriculum Adaptive Sampling for Extreme Data Imba
 ### Preprocessing
 * Hounsfield
 ```python
-minHU = -1000
-maxHU = 400
+> minHU = -1000
+> maxHU = 400
 ```
 
 * Resample
 ```bash
-1.25mm
+> 1.25mm
 ```
 
 ### Network Architecture
