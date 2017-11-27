@@ -16,7 +16,7 @@ maxHU = 400
 ```
 
 * Resample
-```python
+```bash
 1.25mm
 ```
 
