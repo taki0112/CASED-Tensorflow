@@ -27,9 +27,9 @@ class CASED(object) :
         self.y_dim = 2 # nodule ? or non_nodule ?
         self.out_dim = 8
 
-        self.learning_rate = 0.1
+        self.learning_rate = 0.2
         self.momentum = 0.9
-        self.M = 5
+        self.M = 10
 
     def cased_network(self, x, reuse=False, scope='CASED_NETWORK'):
         with tf.variable_scope(scope, reuse=reuse) :
