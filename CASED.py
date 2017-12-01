@@ -122,10 +122,11 @@ class CASED(object) :
         self.optim = tf.train.MomentumOptimizer(learning_rate=self.decay_lr, momentum=self.momentum, use_nesterov=True).minimize(self.loss)
 
         """ Summary """
+        c_lr = tf.summary.scalar('cosine_lr', self.decay_lr)
         c_loss = tf.summary.scalar('loss', self.loss)
         c_acc = tf.summary.scalar('acc', self.accuracy)
         c_recall = tf.summary.scalar('sensitivity', self.sensitivity)
-        self.c_sum = tf.summary.merge([c_loss, c_acc, c_recall])
+        self.c_sum = tf.summary.merge([c_lr, c_loss, c_acc, c_recall])
 
     def train(self):
 
