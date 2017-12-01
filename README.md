@@ -7,6 +7,10 @@ Tensorflow implementation of [Curriculum Adaptive Sampling for Extreme Data Imba
 ```
 * See `main.py` for other arguments.
 
+## Issue
+* I use ***[Snapshot Ensemble](https://openreview.net/pdf?id=BJYwwY9ll)***
+* M=5, init_lr=0.1
+
 ## Idea
 ### Preprocessing
 * Hounsfield
