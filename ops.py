@@ -25,7 +25,7 @@ def max_pooling(x, kernel=2, stride=2, padding='VALID') :
     return x
 
 def copy_crop(crop_layer, in_layer, crop) :
-    x = int(crop_layer.shape[1])
+    x = int(crop_layer.shape[1]) # 1 or 2 or 3, 즉 x,y,z
     cropping_pixel = int((x - (x/crop)) * 0.5)
     crop_layer = crop_layer[:, cropping_pixel : -cropping_pixel, cropping_pixel : -cropping_pixel, cropping_pixel : -cropping_pixel, :]
     return tf.concat([crop_layer, in_layer], axis=-1)

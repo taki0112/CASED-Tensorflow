@@ -29,6 +29,7 @@ class CASED(object) :
 
         self.learning_rate = 0.1
         self.momentum = 0.9
+        self.M = 5
 
     def cased_network(self, x, reuse=False, scope='CASED_NETWORK'):
         with tf.variable_scope(scope, reuse=reuse) :
@@ -156,21 +157,18 @@ class CASED(object) :
         # 10 counter = 1 epoch
         for epoch in range(start_epoch, self.epoch):
             for sub_n in range(start_batch_id, self.total_subset) :
+                # K fold cross validation ...
                 train_acc = 0.0
                 train_recall = 0.0
                 nan_num = 0
                 prob = 1.0
-                train_lr = self.learning_rate
-
                 nodule_patch, all_patch, nodule_y, all_y = prepare_date(sub_n)
                 M = len(all_patch)
                 num_batches = M // self.batch_size
                 print('finish prepare data : ', M)
                 for idx in range(num_batches):
 
-                    if idx == int((num_batches * 0.5)) or idx == int((num_batches * 0.75)) :
-                        train_lr = train_lr / 10
-                        print("*** now learning rate : {} ***\n".format(train_lr))
+                    train_lr = Snapshot(t=idx, T=num_batches, M=self.M, alpha_zero=self.learning_rate)
                     each_time = time.time()
                     p = uniform(0,1)
                     print('probability M : ', prob)
@@ -205,6 +203,7 @@ class CASED(object) :
                             index = nlargest(self.batch_size, predict_dict, key=predict_dict.get)
                             predict_dict = {s_idx: predict_dict[s_idx] for s_idx in index}
 
+                        # print(len(x))
                         g_r_index = list(predict_dict.keys())
                         batch_patch = all_patch[g_r_index]
                         batch_y = all_y[g_r_index]
@@ -224,7 +223,6 @@ class CASED(object) :
 
                     if np.isnan(c_recall) :
                         train_acc += c_acc
-                        # train_recall += 0
                         nan_num += 1
                     else :
                         train_acc += c_acc
