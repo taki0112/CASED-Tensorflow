@@ -12,6 +12,22 @@ Tensorflow implementation of [Curriculum Adaptive Sampling for Extreme Data Imba
 * M=5, init_lr=0.1
 
 ![snapshot](./assests/lr.JPG)
+```python
+def Snapshot(t, T, M, alpha_zero) :
+    """
+    t = # of current iteration
+    T = # of total iteration
+    M = # of snapshot
+    alpha_zero = init learning rate
+    """
+
+    x = (np.pi * (t % (T // M))) / (T // M)
+    x = np.cos(x) + 1
+
+    lr = (alpha_zero / 2) * x
+
+    return lr
+ ```
 
 ## Idea
 ### Preprocessing
