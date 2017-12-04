@@ -12,6 +12,7 @@ def parse_args():
     parser.add_argument('--epoch', type=int, default=10, help='The number of epochs to run')
     parser.add_argument('--batch_size', type=int, default=16, help='The size of batch')
     parser.add_argument('--test_batch_size', type=int, default=16, help='The size of test batch')
+    parser.add_argument('--num_gpu', type=int, default=8, help='# of gpu')
     parser.add_argument('--checkpoint_dir', type=str, default='checkpoint',
                         help='Directory name to save the checkpoints')
     parser.add_argument('--result_dir', type=str, default='results',
@@ -56,8 +57,9 @@ def main():
 
     # open session
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-        model = CASED(sess, epoch=args.epoch, batch_size=args.batch_size, test_batch_size=args.test_batch_size,
+        model = CASED(sess, epoch=args.epoch, batch_size=args.batch_size, test_batch_size=args.test_batch_size, num_gpu=args.num_gpu,
                       checkpoint_dir=args.checkpoint_dir, result_dir=args.result_dir, log_dir=args.log_dir)
+
 
         # build graph
         model.build_model()

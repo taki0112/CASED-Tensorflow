@@ -5,7 +5,7 @@ from random import uniform
 from ops import *
 from utils import *
 class CASED(object) :
-    def __init__(self, sess, epoch, batch_size, test_batch_size, checkpoint_dir, result_dir, log_dir):
+    def __init__(self, sess, epoch, batch_size, test_batch_size, num_gpu, checkpoint_dir, result_dir, log_dir):
         self.sess = sess
         self.dataset_name = 'LUNA16'
         self.checkpoint_dir = checkpoint_dir
@@ -17,8 +17,8 @@ class CASED(object) :
         self.predictor_batch_size = batch_size * 2
 
         self.model_name = "CASED"     # name for checkpoint
+        self.num_gpu = num_gpu
         self.total_subset = 10
-        self.num_gpu = 8
 
         self.x = 68
         self.y = 68
