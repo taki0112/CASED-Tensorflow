@@ -40,7 +40,7 @@ def Snapshot(t, T, M, alpha_zero) :
 
 * Resample
 ```bash
-> 1.25mm
+> 1mm (In paper, use 1.25mm)
 ```
 
 ### Network Architecture
