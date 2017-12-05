@@ -17,7 +17,7 @@ def flatten(x) :
 
 def fully_connected(x, unit=2, layer_name='fully') :
     with tf.name_scope(layer_name) :
-        return tf.layers.dense(x, units=unit, kernel_initializer=he_init())
+        return tf.layers.dense(x, units=unit)
 
 def max_pooling(x, kernel=2, stride=2, padding='VALID') :
     x = tf.concat([x, x], axis=-1)
