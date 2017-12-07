@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from utils import load_itk, world_2_voxel
 import scipy.ndimage
+from skimage.measure import block_reduce
 
 OUTPUT_SPACING = [1, 1, 1]
 patch_size = 68
@@ -15,10 +16,12 @@ stride = 8
 move = (patch_size // 2) // stride  # 4
 annotations = pd.read_csv('/data/jhkim/LUNA16/CSVFILES/annotations.csv')  # save dict format may be..
 
+
 def indices_to_one_hot(data, nb_classes):
     """Convert an iterable of indices to one-hot encoded labels."""
     targets = np.array(data).reshape(-1)
     return np.eye(nb_classes)[targets]
+
 
 def normalize(image):
     maxHU = 400.
@@ -41,26 +44,20 @@ def get_patch(image, coords, offset, nodule_list, patch_flag=True):
     xyz = image[int(coords[0] - offset): int(coords[0] + offset), int(coords[1] - offset): int(coords[1] + offset),
           int(coords[2] - offset): int(coords[2] + offset)]
 
-    if patch_flag :
-        xyz = normalize(xyz)
-        xyz = zero_center(xyz)
-
+    if patch_flag:
         output = np.expand_dims(xyz, axis=-1)
-    else :
-        non_zoom = np.count_nonzero(xyz)
+    else:
         # resize xyz
-        xyz = scipy.ndimage.zoom(input=xyz, zoom=1/8, order=5) # nearest
-        zoom = np.count_nonzero(xyz)
-        
-        print(str(non_zoom) + ' --- ' + str(zoom))
-
+        """
+        xyz = scipy.ndimage.zoom(input=xyz, zoom=1/8, order=1) # nearest
+        xyz = np.where(xyz > 0, 1.0, 0.0)
+        """
+        xyz = block_reduce(xyz, (9, 9, 9), np.max)
         output = np.expand_dims(xyz, axis=-1)
 
         output = indices_to_one_hot(output.astype(np.int32), 2)
         output = np.reshape(output, (label_size, label_size, label_size, 2))
         output = output.astype(np.float32)
-
-
     nodule_list.append(output)
 
 
@@ -172,8 +169,11 @@ def process_image(image_path, annotations, nodule, non_nodule, nodule_label, non
     real_resize = new_shape / image.shape
     new_spacing = spacing / real_resize
 
-    image = np.transpose(np.load(SH_path))
-    label = np.transpose(np.load(label_name))
+    image = np.transpose(np.load(SH_path)).astype(np.float32)
+    label = np.transpose(np.load(label_name)).astype(np.float32)
+
+    image = normalize(image)
+    image = zero_center(image)
 
     # padding
     offset = patch_size // 2
@@ -195,7 +195,7 @@ def process_image(image_path, annotations, nodule, non_nodule, nodule_label, non
         row = annotations.iloc[i]
         world_coords = np.array([row.coordX, row.coordY, row.coordZ])
 
-        coords = np.floor(world_2_voxel(world_coords, origin, new_spacing)) + offset  # center
+        coords = np.floor(world_2_voxel(world_coords, origin, new_spacing)) + offset + (stride * move)  # center
         patch_stride(image, coords, offset, nodule_list)  # x,y,z, xy,xz,yz, xyz ... get stride patch
         patch_stride(label, coords, offset, nodule_label_list, patch_flag=False)
 
@@ -222,7 +222,6 @@ def process_image(image_path, annotations, nodule, non_nodule, nodule_label, non
     nodule_label.extend(nodule_label_list)
     non_nodule_label.extend(non_nodule_label_list)
 
-
     print('nodule : ', np.shape(nodule))
     print('nodule_label : ', np.shape(nodule_label))
     print('non-nodule : ', np.shape(non_nodule))
@@ -236,11 +235,9 @@ for i in range(10):
     nodule_label = []
     non_nodule_label = []
 
-
     idx = 1
     flag = 1
     save_path = '/data2/jhkim/LUNA16/patch/SH/'
-
     for image_path in image_paths:
         print('subset' + str(i) + ' / ' + str(idx) + ' / ' + str(len(image_paths)))
         process_image(image_path, annotations, nodule, non_nodule, nodule_label, non_nodule_label)
@@ -259,7 +256,6 @@ for i in range(10):
     train_nodule_len = int(len(nodule) * 0.7)
     train_non_nodule_len = int(len(non_nodule) * 0.7)
 
-
     with h5py.File(save_path + 'subset' + str(i) + '.h5', 'w') as hf:
         hf.create_dataset('nodule', data=nodule[:train_nodule_len], compression='lzf')
         hf.create_dataset('label_nodule', data=nodule_label[:train_nodule_len], compression='lzf')
@@ -270,7 +266,6 @@ for i in range(10):
     with h5py.File(save_path + 't_subset' + str(i) + '.h5', 'w') as hf:
         hf.create_dataset('nodule', data=nodule[train_nodule_len:], compression='lzf')
         hf.create_dataset('label_nodule', data=nodule_label[train_nodule_len:], compression='lzf')
-
 
         hf.create_dataset('non_nodule', data=non_nodule[train_non_nodule_len:], compression='lzf')
         hf.create_dataset('label_non_nodule', data=non_nodule_label[train_non_nodule_len:], compression='lzf')
