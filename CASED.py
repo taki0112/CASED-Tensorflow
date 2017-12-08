@@ -146,12 +146,12 @@ class CASED(object) :
         could_load, checkpoint_counter = self.load(self.checkpoint_dir)
         if could_load:
             start_epoch = (int)(checkpoint_counter / self.total_subset)
-            start_batch_id = checkpoint_counter - start_epoch * self.total_subset
+            start_sub_n = checkpoint_counter - start_epoch * self.total_subset
             counter = checkpoint_counter
             print(" [*] Load SUCCESS")
         else:
             start_epoch = 0
-            start_batch_id = 0
+            start_sub_n = 0
             counter = 0
             print(" [!] Load failed...")
 
@@ -160,7 +160,7 @@ class CASED(object) :
         count_temp = 0
         # 10 counter = 1 epoch
         for epoch in range(start_epoch, self.epoch):
-            for sub_n in range(start_batch_id, self.total_subset) :
+            for sub_n in range(start_sub_n, self.total_subset) :
                 train_acc = 0.0
                 train_recall = 0.0
                 nan_num = 0
@@ -306,10 +306,10 @@ class CASED(object) :
             print(line)
             with open(os.path.join(self.result_dir,'test_logs.txt'), 'a') as f:
                 f.write(line)
-            start_batch_id = 0
+            start_sub_n = 0
             # save model for final step
-            self.save(self.checkpoint_dir, counter)
-            counter += 1
+            #self.save(self.checkpoint_dir, counter)
+            #counter += 1
 
     @property
     def model_dir(self):
