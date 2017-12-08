@@ -28,7 +28,7 @@ class CASED(object) :
 
         self.weight_decay = 1e-4
         self.lr_decay = 1.0  # not decay
-        self.learning_rate = 0.2
+        self.learning_rate = 0.01
         self.momentum = 0.9
         self.M = 10
 
