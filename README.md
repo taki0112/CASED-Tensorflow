@@ -1,6 +1,11 @@
 # CASED-Tensorflow
 Tensorflow implementation of [Curriculum Adaptive Sampling for Extreme Data Imbalance](https://www.researchgate.net/publication/319461093_CASED_Curriculum_Adaptive_Sampling_for_Extreme_Data_Imbalance) with **multi GPU** using [*LUNA16*](https://luna16.grand-challenge.org/)
 
+## Preprocessing
+```python
+> python all_in_one.py
+```
+* Check `src_root` and `save_path`
 ## Usage
 ```python
 > python main.py
@@ -11,7 +16,7 @@ Tensorflow implementation of [Curriculum Adaptive Sampling for Extreme Data Imba
 * *The hyper-parameter information is not listed in the paper, so I'm still testing it.*
 * I use ***[Snapshot Ensemble](https://arxiv.org/pdf/1704.00109.pdf)***
 * M=10, init_lr=0.2
-* Or Fix learning rate **0.1** or **0.2**
+* Or Fix learning rate **0.01**
 
 ![snapshot](./assests/lr.JPG)
 ```python
