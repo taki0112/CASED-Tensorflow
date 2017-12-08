@@ -69,6 +69,8 @@ if __name__=="__main__":
 
             image = np.transpose(norm_img)
             label = np.transpose(label)
+            origin = np.transpose(origin)
+            new_spacing = np.transpose(new_spacing)
 
             #np.save(os.path.join(dst_subset_path,series_uid+'.npy'), norm_img)
             #np.save(os.path.join(dst_subset_path,series_uid+'.label.npy'), label)
