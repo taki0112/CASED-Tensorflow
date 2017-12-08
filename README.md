@@ -55,4 +55,4 @@ def Snapshot(t, T, M, alpha_zero) :
 
 
 ## Author
-Junho Kim @[Lunit](http://lunit.io/)
+Junho Kim at [Lunit](http://lunit.io/)
