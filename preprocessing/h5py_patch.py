@@ -169,10 +169,10 @@ def process_image(image_path, annotations, nodule, non_nodule, nodule_label, non
     real_resize = new_shape / image.shape
     new_spacing = spacing / real_resize
 
-    image = np.transpose(np.load(SH_path)).astype(np.float32)
-    label = np.transpose(np.load(label_name)).astype(np.float32)
+    image = np.transpose(np.load(SH_path))
+    label = np.transpose(np.load(label_name))
 
-    image = normalize(image)
+    # image = normalize(image)
     image = zero_center(image)
 
     # padding

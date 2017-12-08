@@ -13,9 +13,8 @@ class CASED(object) :
         self.log_dir = log_dir
         self.epoch = epoch
         self.batch_size = batch_size
-        self.test_batch_size = test_batch_size * 2
+        self.test_batch_size = test_batch_size
         self.predictor_batch_size = batch_size * 2
-
         self.model_name = "CASED"     # name for checkpoint
         self.num_gpu = num_gpu
         self.total_subset = 10
@@ -27,6 +26,8 @@ class CASED(object) :
         self.y_dim = 2 # nodule ? or non_nodule ?
         self.out_dim = 8
 
+        self.weight_decay = 1e-4
+        self.lr_decay = 1.0  # not decay
         self.learning_rate = 0.2
         self.momentum = 0.9
         self.M = 10
@@ -109,6 +110,8 @@ class CASED(object) :
 
         """ Loss function """
         self.loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=self.y, logits=self.logits))
+        self.l2_loss = tf.add_n([tf.nn.l2_loss(var) for var in tf.trainable_variables()])
+        self.loss = self.loss + self.l2_loss*self.weight_decay
 
         self.correct_prediction = tf.equal(tf.argmax(self.softmax_logits, -1), tf.argmax(self.y, -1))
         self.P_correct_prediction = tf.equal(tf.argmax(self.P_softmax_logits, -1), tf.argmax(self.y, -1))
@@ -158,18 +161,20 @@ class CASED(object) :
         # 10 counter = 1 epoch
         for epoch in range(start_epoch, self.epoch):
             for sub_n in range(start_batch_id, self.total_subset) :
-                # K fold cross validation ...
                 train_acc = 0.0
                 train_recall = 0.0
                 nan_num = 0
                 prob = 1.0
+                train_lr = self.learning_rate
                 nodule_patch, all_patch, nodule_y, all_y = prepare_date(sub_n)
                 M = len(all_patch)
                 num_batches = M // self.batch_size
                 print('finish prepare data : ', M)
                 for idx in range(num_batches):
+                    if idx == int((num_batches * 0.5)) :
+                         train_lr = train_lr * self.lr_decay
+                         print("*** now learning rate : {} ***\n".format(train_lr))
 
-                    train_lr = Snapshot(t=idx, T=num_batches, M=self.M, alpha_zero=self.learning_rate)
                     each_time = time.time()
                     p = uniform(0,1)
                     print('probability M : ', prob)
@@ -178,7 +183,6 @@ class CASED(object) :
                         random_index = np.random.choice(len(nodule_patch), size=self.batch_size, replace=False)
                         batch_patch = nodule_patch[random_index]
                         batch_y = nodule_y[random_index]
-
                     else :
                         predict_batch = self.predictor_batch_size * self.num_gpu
                         total_predict_index = M // predict_batch
@@ -204,12 +208,11 @@ class CASED(object) :
                             index = nlargest(self.batch_size, predict_dict, key=predict_dict.get)
                             predict_dict = {s_idx: predict_dict[s_idx] for s_idx in index}
 
-                        # print(len(x))
                         g_r_index = list(predict_dict.keys())
                         batch_patch = all_patch[g_r_index]
                         batch_y = all_y[g_r_index]
 
-
+                    # import ipdb; ipdb.set_trace()
                     prob *= pow(1/M, 1/num_batches)
                     train_feed_dict = {
                         self.inputs: batch_patch, self.y : batch_y,
@@ -224,6 +227,7 @@ class CASED(object) :
 
                     if np.isnan(c_recall) :
                         train_acc += c_acc
+                        # train_recall += 0
                         nan_num += 1
                     else :
                         train_acc += c_acc

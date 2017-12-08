@@ -20,8 +20,9 @@ def fully_connected(x, unit=2, layer_name='fully') :
         return tf.layers.dense(x, units=unit)
 
 def max_pooling(x, kernel=2, stride=2, padding='VALID') :
-    x = tf.concat([x, x], axis=-1)
+    # x = tf.concat([x, x], axis=-1)
     x = tf.layers.max_pooling3d(inputs=x, pool_size=kernel, strides=stride, padding=padding)
+    x = tf.concat([x, x], axis=-1)
     return x
 
 def copy_crop(crop_layer, in_layer, crop) :
