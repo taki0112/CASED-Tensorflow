@@ -40,8 +40,8 @@ def Snapshot(t, T, M, alpha_zero) :
 ### Preprocessing
 * Hounsfield
 ```python
-> minHU = -1000
-> maxHU = 400
+> minHU = -1200
+> maxHU = 600
 ```
 
 * Resample
