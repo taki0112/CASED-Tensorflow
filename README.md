@@ -11,7 +11,7 @@ Tensorflow implementation of [Curriculum Adaptive Sampling for Extreme Data Imba
 ```python
 > python main_train.py
 ```
-* See `main.py` for other arguments.
+* See `main_train.py` for other arguments.
 
 ## Usage for test
 ```python
