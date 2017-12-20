@@ -6,16 +6,22 @@ Tensorflow implementation of [Curriculum Adaptive Sampling for Extreme Data Imba
 > python all_in_one.py
 ```
 * Check `src_root` and `save_path`
-## Usage
+
+## Usage for train
 ```python
-> python main.py
+> python main_train.py
 ```
 * See `main.py` for other arguments.
+
+## Usage for test
+```python
+> python main_test.py
+```
 
 ## Issue
 * *The hyper-parameter information is not listed in the paper, so I'm still testing it.*
 * Use ***[Snapshot Ensemble](https://arxiv.org/pdf/1704.00109.pdf)*** (M=10, init_lr=0.1)
-* Or Fix learning rate **0.01**
+* Or Fix learning rate **0.001**
 
 ![snapshot](./assests/lr.JPG)
 ```python
@@ -39,13 +45,13 @@ def Snapshot(t, T, M, alpha_zero) :
 ### Preprocessing
 * Hounsfield
 ```python
-> minHU = -1200
-> maxHU = 600
+> minHU = -1000
+> maxHU = 400
 ```
 
 * Resample
 ```bash
-> 1mm (In paper, use 1.25mm)
+> 1.25mm
 ```
 
 ### Network Architecture
