@@ -1,9 +1,13 @@
 import numpy as np
 import SimpleITK as sitk
 import tensorflow as tf
-import os, h5py
+import os, h5py, glob
 import tensorflow.contrib.slim as slim
 from multiprocessing import Pool
+from sklearn.metrics import roc_curve, auc
+import matplotlib.pyplot as plt
+from matplotlib.ticker import  FixedFormatter
+
 
 seed = 0
 file = ""
@@ -66,7 +70,7 @@ def label_non_nodule_hf(idx):
     return non_nodule
 
 
-def prepare_date(sub_n):
+def prepare_data(sub_n):
     global file
     dir = '/data2/jhkim/LUNA16/patch/SH/subset'
     file = ''.join([dir, str(sub_n), '.h5'])
@@ -110,8 +114,72 @@ def prepare_date(sub_n):
     all_y = np.concatenate([nodule_y, non_nodule_y], axis=0)
     all_patch = np.concatenate([nodule, non_nodule], axis=0)
 
+    # seed = 777
+    # np.random.seed(seed)
+    # np.random.shuffle(nodule)
+    # np.random.seed(seed)
+    # np.random.shuffle(nodule_y)
+    #
+    # np.random.seed(seed)
+    # np.random.shuffle(all_patch)
+    # np.random.seed(seed)
+    # np.random.shuffle(all_y)
+
+
     return nodule, all_patch, nodule_y, all_y
 
+def validation_data(sub_n) :
+    global file
+    dir = '/data2/jhkim/LUNA16/patch/SH/subset'
+    file = ''.join([dir, str(sub_n), '.h5'])
+
+    with h5py.File(file, 'r') as fin:
+        nodule_range = range(0, len(fin['nodule']), get_data_num)
+        non_nodule_range = range(0, len(fin['non_nodule']), get_data_num)
+        label_nodule_range = range(0, len(fin['label_nodule']), get_data_num)
+        label_non_nodule_range = range(0, len(fin['label_non_nodule']), get_data_num)
+
+
+    pool = Pool(processes=process_num)
+    pool_nodule = pool.map(nodule_hf, nodule_range)
+    pool_non_nodule = pool.map(non_nodule_hf, non_nodule_range)
+    pool_label_nodule = pool.map(label_nodule_hf, label_nodule_range)
+    pool_label_non_nodule = pool.map(label_non_nodule_hf, label_non_nodule_range)
+
+    pool.close()
+
+    nodule = []
+    non_nodule = []
+
+    nodule_y = []
+    non_nodule_y = []
+
+    for p in pool_nodule:
+        nodule.extend(p)
+    for p in pool_non_nodule:
+        non_nodule.extend(p)
+
+    for p in pool_label_nodule:
+        nodule_y.extend(p)
+    for p in pool_label_non_nodule:
+        non_nodule_y.extend(p)
+
+    nodule = np.asarray(nodule)
+    non_nodule = np.asarray(non_nodule)
+    nodule_y = np.asarray(nodule_y)
+    non_nodule_y = np.asarray(non_nodule_y)
+
+    all_y = np.concatenate([nodule_y, non_nodule_y], axis=0)
+    all_patch = np.concatenate([nodule, non_nodule], axis=0)
+
+    # seed = 777
+    # np.random.seed(seed)
+    # np.random.shuffle(all_patch)
+    # np.random.seed(seed)
+    # np.random.shuffle(all_y)
+
+
+    return all_patch, all_y
 
 def test_data(sub_n):
     global file
@@ -157,15 +225,24 @@ def test_data(sub_n):
     all_y = np.concatenate([nodule_y, non_nodule_y], axis=0)
     all_patch = np.concatenate([nodule, non_nodule], axis=0)
 
+    # seed = 777
+    # np.random.seed(seed)
+    # np.random.shuffle(all_patch)
+    # np.random.seed(seed)
+    # np.random.shuffle(all_y)
+
+
     return all_patch, all_y
 
 
 def sensitivity(logits, labels):
+
+
     predictions = tf.argmax(logits, axis=-1)
     actuals = tf.argmax(labels, axis=-1)
 
     nodule_actuals = tf.ones_like(actuals)
-    # non_nodule_actuals = tf.zeros_like(actuals)
+    non_nodule_actuals = tf.zeros_like(actuals)
     nodule_predictions = tf.ones_like(predictions)
     non_nodule_predictions = tf.zeros_like(predictions)
 
@@ -178,7 +255,7 @@ def sensitivity(logits, labels):
             tf.float32
         )
     )
-    """
+
     tn_op = tf.reduce_sum(
         tf.cast(
             tf.logical_and(
@@ -198,7 +275,7 @@ def sensitivity(logits, labels):
             tf.float32
         )
     )
-    """
+
     fn_op = tf.reduce_sum(
         tf.cast(
             tf.logical_and(
@@ -209,9 +286,11 @@ def sensitivity(logits, labels):
         )
     )
 
+    false_positive_rate = fp_op / (fp_op + tn_op)
+
     recall = tp_op / (tp_op + fn_op)
 
-    return recall
+    return recall, false_positive_rate
 
 def Snapshot(t, T, M, alpha_zero) :
     """
@@ -229,3 +308,80 @@ def Snapshot(t, T, M, alpha_zero) :
     lr = (alpha_zero / 2) * x
 
     return lr
+
+def indices_to_one_hot(data, nb_classes):
+    """Convert an iterable of indices to one-hot encoded labels."""
+    targets = np.array(data).reshape(-1)
+    return np.eye(nb_classes)[targets]
+
+def nearest_prob(fp) :
+    confidence = 0.95
+    z = (1.0 - confidence) / 2.0
+
+    fp_list = [0.125, 0.25, 0.5, 1, 2, 4, 8]
+
+    flag = True
+    for candidate_fp in fp_list :
+        if candidate_fp*(1-z) <= fp <= candidate_fp :
+            flag = False
+            return candidate_fp
+        else :
+            continue
+
+    if flag :
+        return 0
+
+
+def create_exclude_mask(arr_shape, position, diameter):
+    x_dim, y_dim, z_dim = arr_shape
+    x_pos, y_pos, z_pos = position
+
+    x, y, z = np.ogrid[-x_pos:x_dim - x_pos, -y_pos:y_dim - y_pos, -z_pos:z_dim - z_pos]
+    mask = x ** 2  + y ** 2 + z ** 2 > int(diameter // 2) ** 2
+
+    return mask
+
+def fp_per_scan(logit, label) :
+    fp_list = [0.125, 0.25, 0.5, 1, 2, 4, 8]
+    MIN_FROC = 0.125
+    MAX_FROC = 8
+    logit = np.reshape(logit, -1)
+    label = np.reshape(label, -1)
+
+    fpr, tpr, th = roc_curve(label, logit)
+    fps = fpr * logit.size
+
+    fps_itp = np.linspace(MIN_FROC, MAX_FROC, num=64)
+    sens_itp = np.interp(fps_itp, fps, tpr)
+
+    sens_list = []
+
+    for fp in fp_list :
+        sens = sens_itp[np.where(fps_itp == fp)[0][0]]
+        sens_list.append(sens)
+    """
+    mean_sens = np.mean(sens_list)
+    
+    ax = plt.gca()
+    plt.plot(fps_itp, sens_itp)
+    plt.xlim(MIN_FROC, MAX_FROC)
+    plt.ylim(0, 1.1)
+    plt.xlabel('Average number of false positives per scan')
+    plt.ylabel('Sensitivity')
+    # plt.legend(loc='lower right')
+    # plt.legend(loc=9)
+    plt.title('Average sensitivity = %.4f' % (mean_sens))
+
+    plt.xscale('log', basex=2)
+    ax.xaxis.set_major_formatter(FixedFormatter(fp_list))
+
+    ax.xaxis.set_ticks(fp_list)
+    ax.yaxis.set_ticks(np.arange(0, 1.1, 0.1))
+    plt.grid(b=True, linestyle='dotted', which='both')
+    plt.tight_layout()
+
+    # plt.show()
+    # plt.savefig('')
+    """
+
+    return np.asarray(sens_list)

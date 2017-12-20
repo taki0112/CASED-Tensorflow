@@ -10,7 +10,7 @@ from skimage import measure, morphology
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from skimage.measure import block_reduce
 
-OUTPUT_SPACING = [1, 1, 1]
+OUTPUT_SPACING = [1.25, 1.25, 1.25]
 patch_size = 68
 label_size = 8
 stride = 8
@@ -28,7 +28,7 @@ def load_itk_image(filename):
 
 def read_csv(filename):
     lines = []
-    with open(filename, 'rb') as f:
+    with open(filename, 'r') as f:
         csvreader = csv.reader(f)
         for line in csvreader:
             lines.append(line)
@@ -52,8 +52,8 @@ def compute_coord(worldCoord, origin, spacing):
     return voxelCoord
 
 def normalize_planes(npzarray):
-    maxHU = 600.
-    minHU = -1200.
+    maxHU = 400. # 600
+    minHU = -1000. # -1200
 
     npzarray = (npzarray - minHU) / (maxHU - minHU)
     npzarray[npzarray>1] = 1.
@@ -77,6 +77,7 @@ def get_patch(image, coords, offset, nodule_list, patch_flag=True):
 
     if patch_flag:
         output = np.expand_dims(xyz, axis=-1)
+        print(coords, np.shape(output))
     else:
         # resize xyz
         """
@@ -89,6 +90,13 @@ def get_patch(image, coords, offset, nodule_list, patch_flag=True):
         output = indices_to_one_hot(output.astype(np.int32), 2)
         output = np.reshape(output, (label_size, label_size, label_size, 2))
         output = output.astype(np.float32)
+
+        # print('------------------')
+        # print(output)
+
+        # print(output)
+        # print(np.shape(output))
+
     nodule_list.append(output)
 
 def patch_stride(image, coords, offset, nodule_list, patch_flag=True):
@@ -206,7 +214,7 @@ def create_label(arr_shape, nodules, origin, new_spacing, coord=False):
         z_pos, y_pos, x_pos = position
 
         z,y,x = np.ogrid[-z_pos:z_dim-z_pos, -y_pos:y_dim-y_pos, -x_pos:x_dim-x_pos]
-        mask = z**2 + y**2 + x**2 <= int(diameter)**2
+        mask = z**2 + y**2 + x**2 <= int(diameter//2)**2
 
         return mask
 

@@ -1,7 +1,7 @@
 from preprocessing.preprocess_utils import *
 from random import randint
 import h5py
-OUTPUT_SPACING = [1, 1, 1]
+OUTPUT_SPACING = [1.25, 1.25, 1.25]
 patch_size = 68
 label_size = 8
 stride = 8
@@ -15,7 +15,6 @@ if __name__=="__main__":
     coord = False
 
     dst_spacing = OUTPUT_SPACING
-    data_root = '/data/jhkim/LUNA16'
     src_root = '/data/jhkim/LUNA16/original'
     #dst_root = '/lunit/data/LUNA16/npydata'
 
@@ -24,7 +23,7 @@ if __name__=="__main__":
     # if not os.path.exists(dst_root):
     #     os.makedirs(dst_root)
 
-    annotation_csv = os.path.join(data_root,'CSVFILES/annotations.csv')
+    annotation_csv = os.path.join(src_root,'CSVFILES/annotations.csv')
     annotations = read_csv(annotation_csv)
 
     src_mhd = []
@@ -56,7 +55,7 @@ if __name__=="__main__":
 
             norm_img = normalize_planes(resampled_img)
             norm_img = zero_center(norm_img)
-
+            norm_img_shape = norm_img.shape
             nodule_coords = []
             try:
                 nodule_coords = annotations[series_uid]
@@ -69,8 +68,8 @@ if __name__=="__main__":
 
             image = np.transpose(norm_img)
             label = np.transpose(label)
-            origin = np.transpose(origin)
-            new_spacing = np.transpose(new_spacing)
+            #origin = np.transpose(origin)
+            #new_spacing = np.transpose(new_spacing)
 
             #np.save(os.path.join(dst_subset_path,series_uid+'.npy'), norm_img)
             #np.save(os.path.join(dst_subset_path,series_uid+'.label.npy'), label)
@@ -93,14 +92,15 @@ if __name__=="__main__":
 
             for nodule_coord in nodule_coords :
                 worldCoord = nodule_coord['position']
-                worldCoord = np.asarray([worldCoord[0], worldCoord[1], worldCoord[2]])
+                worldCoord = np.asarray([worldCoord[2], worldCoord[1], worldCoord[0]])
 
                 # new_spacing came from resample
                 voxelCoord = compute_coord(worldCoord, origin, new_spacing)
-                voxelCoord = [int(i) + offset + (stride * move) for i in voxelCoord]
+                voxelCoord = np.asarray([int(i) + offset + (stride * move) for i in voxelCoord])
+                voxelCoord = np.transpose(voxelCoord)
 
-                patch_stride(image, nodule_coord, offset, nodule_list)  # x,y,z, xy,xz,yz, xyz ... get stride patch
-                patch_stride(label, nodule_coord, offset, nodule_label_list, patch_flag=False)
+                patch_stride(image, voxelCoord, offset, nodule_list)  # x,y,z, xy,xz,yz, xyz ... get stride patch
+                patch_stride(label, voxelCoord, offset, nodule_label_list, patch_flag=False)
 
             #print(series_uid)
 
@@ -124,6 +124,7 @@ if __name__=="__main__":
 
             nodule.extend(nodule_list)
             non_nodule.extend(non_nodule_list)
+
             nodule_label.extend(nodule_label_list)
             non_nodule_label.extend(non_nodule_label_list)
 
@@ -148,17 +149,26 @@ if __name__=="__main__":
         train_non_nodule_len = int(len(non_nodule) * 0.7)
 
         with h5py.File(save_path + 'subset' + str(sub_n) + '.h5', 'w') as hf:
-            hf.create_dataset('nodule', data=nodule[:train_nodule_len], compression='lzf')
-            hf.create_dataset('label_nodule', data=nodule_label[:train_nodule_len], compression='lzf')
+            hf.create_dataset('nodule', data=nodule[:], compression='lzf')
+            hf.create_dataset('label_nodule', data=nodule_label[:], compression='lzf')
 
-            hf.create_dataset('non_nodule', data=non_nodule[:train_non_nodule_len], compression='lzf')
-            hf.create_dataset('label_non_nodule', data=non_nodule_label[:train_non_nodule_len], compression='lzf')
+            hf.create_dataset('non_nodule', data=non_nodule[:], compression='lzf')
+            hf.create_dataset('label_non_nodule', data=non_nodule_label[:], compression='lzf')
 
-        with h5py.File(save_path + 't_subset' + str(sub_n) + '.h5', 'w') as hf:
-            hf.create_dataset('nodule', data=nodule[train_nodule_len:], compression='lzf')
-            hf.create_dataset('label_nodule', data=nodule_label[train_nodule_len:], compression='lzf')
 
-            hf.create_dataset('non_nodule', data=non_nodule[train_non_nodule_len:], compression='lzf')
-            hf.create_dataset('label_non_nodule', data=non_nodule_label[train_non_nodule_len:], compression='lzf')
+
+        # with h5py.File(save_path + 'subset' + str(sub_n) + '.h5', 'w') as hf:
+        #     hf.create_dataset('nodule', data=nodule[:train_nodule_len], compression='lzf')
+        #     hf.create_dataset('label_nodule', data=nodule_label[:train_nodule_len], compression='lzf')
+        #
+        #     hf.create_dataset('non_nodule', data=non_nodule[:train_non_nodule_len], compression='lzf')
+        #     hf.create_dataset('label_non_nodule', data=non_nodule_label[:train_non_nodule_len], compression='lzf')
+        #
+        # with h5py.File(save_path + 't_subset' + str(sub_n) + '.h5', 'w') as hf:
+        #     hf.create_dataset('nodule', data=nodule[train_nodule_len:], compression='lzf')
+        #     hf.create_dataset('label_nodule', data=nodule_label[train_nodule_len:], compression='lzf')
+        #
+        #     hf.create_dataset('non_nodule', data=non_nodule[train_non_nodule_len:], compression='lzf')
+        #     hf.create_dataset('label_non_nodule', data=non_nodule_label[train_non_nodule_len:], compression='lzf')
 
 

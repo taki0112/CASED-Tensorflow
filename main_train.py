@@ -1,7 +1,7 @@
 import argparse
 
 import tensorflow as tf
-from CASED import CASED
+from CASED_train import CASED
 from utils import check_folder
 from utils import show_all_variables
 
@@ -9,7 +9,7 @@ from utils import show_all_variables
 def parse_args():
     desc = "Tensorflow implementation of CASED"
     parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument('--epoch', type=int, default=10, help='The number of epochs to run')
+    parser.add_argument('--epoch', type=int, default=3, help='The number of epochs to run')
     parser.add_argument('--batch_size', type=int, default=16, help='The size of batch')
     parser.add_argument('--test_batch_size', type=int, default=16, help='The size of test batch')
     parser.add_argument('--num_gpu', type=int, default=8, help='# of gpu')
@@ -59,7 +59,6 @@ def main():
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         model = CASED(sess, epoch=args.epoch, batch_size=args.batch_size, test_batch_size=args.test_batch_size, num_gpu=args.num_gpu,
                       checkpoint_dir=args.checkpoint_dir, result_dir=args.result_dir, log_dir=args.log_dir)
-
 
         # build graph
         model.build_model()

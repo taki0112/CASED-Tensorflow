@@ -8,7 +8,7 @@ from utils import load_itk, world_2_voxel
 import scipy.ndimage
 from skimage.measure import block_reduce
 
-OUTPUT_SPACING = [1, 1, 1]
+OUTPUT_SPACING = [1.25, 1.25, 1.25]
 patch_size = 68
 label_size = 8
 stride = 8
@@ -24,6 +24,7 @@ def indices_to_one_hot(data, nb_classes):
 
 
 def normalize(image):
+    # https://www.kaggle.com/gzuidhof/full-preprocessing-tutorial
     maxHU = 400.
     minHU = -1000.
 
@@ -58,6 +59,13 @@ def get_patch(image, coords, offset, nodule_list, patch_flag=True):
         output = indices_to_one_hot(output.astype(np.int32), 2)
         output = np.reshape(output, (label_size, label_size, label_size, 2))
         output = output.astype(np.float32)
+
+        # print('------------------')
+        # print(output)
+
+        # print(output)
+        # print(np.shape(output))
+
     nodule_list.append(output)
 
 
@@ -173,7 +181,7 @@ def process_image(image_path, annotations, nodule, non_nodule, nodule_label, non
     label = np.transpose(np.load(label_name))
 
     # image = normalize(image)
-    image = zero_center(image)
+    # image = zero_center(image)
 
     # padding
     offset = patch_size // 2
@@ -192,6 +200,7 @@ def process_image(image_path, annotations, nodule, non_nodule, nodule_label, non
     nodule_list = []
     nodule_label_list = []
     for i in indices:
+        # https://github.com/gzuidhof/luna16/blob/master/src/data_processing/create_xy_xz_yz_CARTESIUS.py
         row = annotations.iloc[i]
         world_coords = np.array([row.coordX, row.coordY, row.coordZ])
 
@@ -238,6 +247,8 @@ for i in range(10):
     idx = 1
     flag = 1
     save_path = '/data2/jhkim/LUNA16/patch/SH/'
+    # https://www.safaribooksonline.com/library/view/python-and-hdf5/9781491944981/ch04.html
+    # https://stackoverflow.com/questions/20928136/input-and-output-numpy-arrays-to-h5py
     for image_path in image_paths:
         print('subset' + str(i) + ' / ' + str(idx) + ' / ' + str(len(image_paths)))
         process_image(image_path, annotations, nodule, non_nodule, nodule_label, non_nodule_label)
@@ -256,16 +267,21 @@ for i in range(10):
     train_nodule_len = int(len(nodule) * 0.7)
     train_non_nodule_len = int(len(non_nodule) * 0.7)
 
+    # print(np.shape(nodule))
+    # print(np.shape(non_nodule))
+
+    # print(np.shape(nodule[:train_nodule_len]))
+
     with h5py.File(save_path + 'subset' + str(i) + '.h5', 'w') as hf:
-        hf.create_dataset('nodule', data=nodule[:train_nodule_len], compression='lzf')
-        hf.create_dataset('label_nodule', data=nodule_label[:train_nodule_len], compression='lzf')
+        hf.create_dataset('nodule', data=nodule[:], compression='lzf')
+        hf.create_dataset('label_nodule', data=nodule_label[:], compression='lzf')
 
-        hf.create_dataset('non_nodule', data=non_nodule[:train_non_nodule_len], compression='lzf')
-        hf.create_dataset('label_non_nodule', data=non_nodule_label[:train_non_nodule_len], compression='lzf')
+        hf.create_dataset('non_nodule', data=non_nodule[:], compression='lzf')
+        hf.create_dataset('label_non_nodule', data=non_nodule_label[:], compression='lzf')
 
-    with h5py.File(save_path + 't_subset' + str(i) + '.h5', 'w') as hf:
-        hf.create_dataset('nodule', data=nodule[train_nodule_len:], compression='lzf')
-        hf.create_dataset('label_nodule', data=nodule_label[train_nodule_len:], compression='lzf')
-
-        hf.create_dataset('non_nodule', data=non_nodule[train_non_nodule_len:], compression='lzf')
-        hf.create_dataset('label_non_nodule', data=non_nodule_label[train_non_nodule_len:], compression='lzf')
+    # with h5py.File(save_path + 't_subset' + str(i) + '.h5', 'w') as hf:
+    #     hf.create_dataset('nodule', data=nodule[train_nodule_len:], compression='lzf')
+    #     hf.create_dataset('label_nodule', data=nodule_label[train_nodule_len:], compression='lzf')
+    #
+    #     hf.create_dataset('non_nodule', data=non_nodule[train_non_nodule_len:], compression='lzf')
+    #     hf.create_dataset('label_non_nodule', data=non_nodule_label[train_non_nodule_len:], compression='lzf')
