@@ -56,7 +56,7 @@ def Snapshot(t, T, M, alpha_zero) :
 
 * Zero centering
 ```python
-> PIXEL MEAN = 0.25
+> Pixel Mean = 0.25
 ```
 
 ### Network Architecture
