@@ -149,14 +149,17 @@ class CASED(object) :
         could_load, checkpoint_counter = self.load(self.checkpoint_dir)
         if could_load:
             if self.K_fold :
-                start_epoch = (int)(checkpoint_counter / (self.total_subset - 2))
-                start_sub_n = checkpoint_counter - start_epoch * (self.total_subset - 2)
+                start_epoch = (int)(checkpoint_counter / (self.total_subset - 1))
+                if start_epoch == 0 :
+                    start_sub_n = checkpoint_counter - start_epoch * (self.total_subset - 1) + 1
+                else :
+                    start_sub_n = checkpoint_counter - start_epoch * (self.total_subset - 1)
 
                 if start_sub_n <= 0 :
                     start_sub_n = 0
             else :
-                start_epoch = (int)(checkpoint_counter / (self.total_subset - 1))
-                start_sub_n = checkpoint_counter - start_epoch * (self.total_subset - 1)
+                start_epoch = (int)(checkpoint_counter / (self.total_subset))
+                start_sub_n = checkpoint_counter - start_epoch * (self.total_subset)
 
                 if start_sub_n <= 0 :
                     start_sub_n = 0
@@ -275,8 +278,8 @@ class CASED(object) :
                 with open(os.path.join(self.result_dir, 'train_logs.txt'), 'a') as f:
                     f.write(line)
                 # save model
-                self.save(self.checkpoint_dir, counter)
                 counter += 1
+                self.save(self.checkpoint_dir, counter)
                 del nodule_patch
                 del nodule_y
                 del all_patch

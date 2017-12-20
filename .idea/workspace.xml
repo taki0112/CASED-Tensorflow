@@ -2,17 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="16ddf22a-de8d-4f01-aba3-926f2dffc536" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/CASED_test.py" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/main_test.py" />
-      <change beforePath="$PROJECT_DIR$/CASED.py" afterPath="$PROJECT_DIR$/CASED_train.py" />
-      <change beforePath="$PROJECT_DIR$/main.py" afterPath="$PROJECT_DIR$/main_train.py" />
-      <change beforePath="$PROJECT_DIR$/ops.py" afterPath="$PROJECT_DIR$/ops.py" />
-      <change beforePath="$PROJECT_DIR$/preprocessing/all_in_one.py" afterPath="$PROJECT_DIR$/preprocessing/all_in_one.py" />
-      <change beforePath="$PROJECT_DIR$/preprocessing/convert_luna_to_npy.py" afterPath="$PROJECT_DIR$/preprocessing/convert_luna_to_npy.py" />
-      <change beforePath="$PROJECT_DIR$/preprocessing/h5py_patch.py" afterPath="$PROJECT_DIR$/preprocessing/h5py_patch.py" />
-      <change beforePath="$PROJECT_DIR$/preprocessing/preprocess_utils.py" afterPath="$PROJECT_DIR$/preprocessing/preprocess_utils.py" />
-      <change beforePath="$PROJECT_DIR$/utils.py" afterPath="$PROJECT_DIR$/utils.py" />
+      <change beforePath="$PROJECT_DIR$/CASED_train.py" afterPath="$PROJECT_DIR$/CASED_train.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -23,11 +13,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="CASED_test.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="CASED_test.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/CASED_test.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="323">
-              <caret line="203" column="56" lean-forward="true" selection-start-line="203" selection-start-column="56" selection-end-line="203" selection-end-column="56" />
+            <state relative-caret-position="823">
+              <caret line="207" column="56" lean-forward="true" selection-start-line="207" selection-start-column="56" selection-end-line="207" selection-end-column="56" />
               <folding />
             </state>
           </provider>
@@ -69,11 +59,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="CASED_train.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="CASED_train.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/CASED_train.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="123">
-              <caret line="284" column="0" lean-forward="true" selection-start-line="284" selection-start-column="0" selection-end-line="284" selection-end-column="0" />
+            <state relative-caret-position="537">
+              <caret line="277" column="42" lean-forward="false" selection-start-line="277" selection-start-column="42" selection-end-line="277" selection-end-column="42" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -129,8 +119,8 @@
         <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/utils.py" />
         <option value="$PROJECT_DIR$/ops.py" />
-        <option value="$PROJECT_DIR$/CASED_train.py" />
         <option value="$PROJECT_DIR$/CASED_test.py" />
+        <option value="$PROJECT_DIR$/CASED_train.py" />
       </list>
     </option>
   </component>
@@ -347,16 +337,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/CASED_train.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="123">
-          <caret line="284" column="0" lean-forward="true" selection-start-line="284" selection-start-column="0" selection-end-line="284" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/preprocessing/convert_luna_to_npy.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-2500">
@@ -369,9 +349,19 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/CASED_test.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="323">
-          <caret line="203" column="56" lean-forward="true" selection-start-line="203" selection-start-column="56" selection-end-line="203" selection-end-column="56" />
+        <state relative-caret-position="823">
+          <caret line="207" column="56" lean-forward="true" selection-start-line="207" selection-start-column="56" selection-end-line="207" selection-end-column="56" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CASED_train.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="537">
+          <caret line="277" column="42" lean-forward="false" selection-start-line="277" selection-start-column="42" selection-end-line="277" selection-end-column="42" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
