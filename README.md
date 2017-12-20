@@ -1,7 +1,7 @@
 # CASED-Tensorflow
 Tensorflow implementation of [Curriculum Adaptive Sampling for Extreme Data Imbalance](https://www.researchgate.net/publication/319461093_CASED_Curriculum_Adaptive_Sampling_for_Extreme_Data_Imbalance) with **multi GPU** using [*LUNA16*](https://luna16.grand-challenge.org/)
 
-## Preprocessing
+## Usage for preprocessing
 ```python
 > python all_in_one.py
 ```
@@ -43,15 +43,20 @@ def Snapshot(t, T, M, alpha_zero) :
 
 ## Idea
 ### Preprocessing
+* Resample
+```bash
+> 1.25mm
+```
+
 * Hounsfield
 ```python
 > minHU = -1000
 > maxHU = 400
 ```
 
-* Resample
-```bash
-> 1.25mm
+* Zero centering
+```python
+> PIXEL MEAN = 0.25
 ```
 
 ### Network Architecture
