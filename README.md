@@ -25,7 +25,7 @@ Tensorflow implementation of [Curriculum Adaptive Sampling for Extreme Data Imba
 ## Issue
 * *The hyper-parameter information is not listed in the paper, so I'm still testing it.*
 * Use ***[Snapshot Ensemble](https://arxiv.org/pdf/1704.00109.pdf)*** (M=10, init_lr=0.1)
-* Or Fix learning rate **0.001**
+* Or Fix learning rate **0.01**
 
 ![snapshot](./assests/lr.JPG)
 ```python
