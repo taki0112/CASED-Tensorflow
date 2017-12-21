@@ -56,8 +56,8 @@ def load_itk(filename):
 
 ### 3. resampling
 * If you load all the luna16 data and make it into a numpy array... You do `resample`, `normalize` and `zero_centering`
-* Each mhd file has different distances between the x, y, and z axes. (You might think this is because the machines that took the pictures are different)
-* `resample` is to match the distances between the x, y, and z axes in all mhd files. 
+* Each mhd file has different distances between the x, y, and z axis. (You might think this is because the machines that took the pictures are different)
+* `resample` is to match the distances between the x, y, and z axis in all mhd files. 
 * `OUTPUT_SPACING` is the distance mentioned above. (In now, `1.25mm`)
 ```python
 def resample(image, org_spacing, new_spacing=OUTPUT_SPACING):
