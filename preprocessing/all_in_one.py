@@ -81,12 +81,11 @@ if __name__=="__main__":
             non_pad = image
             non_label_pad = label
 
-            non_pad = np.pad(non_pad, offset, 'constant', constant_values=np.min(non_pad))
-            non_label_pad = np.pad(non_label_pad, offset, 'constant', constant_values=np.min(non_label_pad))
+            non_pad = np.pad(non_pad, offset, 'edge')
+            non_label_pad = np.pad(non_label_pad, offset, 'edge')
 
-            image = np.pad(image, offset + (stride * move), 'constant', constant_values=np.min(image))
-            label = np.pad(label, offset + (stride * move), 'constant', constant_values=np.min(label))
-
+            image = np.pad(image, offset + (stride * move), 'edge')
+            label = np.pad(label, offset + (stride * move), 'edge')
 
             nodule_list = []
             nodule_label_list = []

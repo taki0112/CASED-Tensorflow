@@ -5,6 +5,7 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 from skimage.util.shape import view_as_blocks as patch_blocks
 from math import ceil
+import numpy as np
 class CASED(object) :
     def __init__(self, sess, batch_size, checkpoint_dir, result_dir, log_dir):
         self.sess = sess
@@ -151,11 +152,9 @@ class CASED(object) :
                 pad_list.append(pad_r)
 
 
-            image = np.pad(image, pad_width=[ [pad_list[0], pad_list[1]], [pad_list[2], pad_list[3]], [pad_list[4], pad_list[5]] ],
-                           mode='constant', constant_values=0)
+            image = np.pad(image, pad_width=[ [pad_list[0], pad_list[1]], [pad_list[2], pad_list[3]], [pad_list[4], pad_list[5]] ], mode='edge')
 
-            label = np.pad(label, pad_width=[ [pad_list[0], pad_list[1]], [pad_list[2], pad_list[3]], [pad_list[4], pad_list[5]] ],
-                           mode='constant', constant_values=0)
+            label = np.pad(label, pad_width=[ [pad_list[0], pad_list[1]], [pad_list[2], pad_list[3]], [pad_list[4], pad_list[5]] ], mode='edge')
 
             print('padding !')
             print(np.shape(image))
@@ -173,7 +172,7 @@ class CASED(object) :
                     y = None
                     for z_i in range(len_z):
                         scan = np.expand_dims(np.expand_dims(image_blocks[x_i, y_i, z_i], axis=-1), axis=0) # 1 72 72 72 1
-                        scan = np.pad(scan, pad_width=[[0, 0], [30, 30], [30, 30], [30, 30], [0, 0]], mode='constant', constant_values=0)
+                        scan = np.pad(scan, pad_width=[[0, 0], [30, 30], [30, 30], [30, 30], [0, 0]], mode='edge')
                         test_feed_dict = {
                             self.inputs: scan
                         }
