@@ -6,7 +6,7 @@ Tensorflow implementation of [Curriculum Adaptive Sampling for Extreme Data Imba
 > python all_in_one.py
 ```
 * Check `src_root` and `save_path`
-
+* Please read [it](https://github.com/taki0112/CASED-Tensorflow/blob/master/Preprocessing.md)
 ## Usage for train
 ```python
 > python main_train.py
