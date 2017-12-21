@@ -44,7 +44,7 @@ def Snapshot(t, T, M, alpha_zero) :
     return lr
  ```
 
-## Idea
+## Summary
 ### Preprocessing
 * Resample
 ```bash
