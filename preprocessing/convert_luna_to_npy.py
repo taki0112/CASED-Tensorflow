@@ -78,7 +78,6 @@ def create_label(arr_shape, nodules, new_spacing, coord=False):
     """
         nodules = list of dict {'position', 'diameter'}
     """
-    # https://code.i-harness.com/ko/q/83f170
     def _create_mask(arr_shape, position, diameter):
 
         z_dim, y_dim, x_dim = arr_shape
