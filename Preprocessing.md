@@ -97,6 +97,7 @@ def zero_center(image):
    <img src="/assests/nodule.png" width="420">
   <img src="/assests/nodule_label.png"  width="420">
 </div>
+
 ```python
 def create_label(arr_shape, nodules, new_spacing, coord=False):
     """
