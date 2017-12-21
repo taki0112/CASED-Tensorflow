@@ -18,7 +18,7 @@
 * `patch size` = 68, ie the size of the patch is `68 * 68 * 68` 
 * `offset` = padding size
 
-![patch](/assests/patch.png)
+<img src="/assests/patch.png" width="30%">
 
 * `stride` = It means how many spaces to move around the nodule
 * It is possible to stride `8 times(4 * 2)` in the ***x, y, z, xy, xz, yz, and xyz*** directions respectively. (*Then, get 56 patch*)
