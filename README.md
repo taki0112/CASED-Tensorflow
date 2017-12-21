@@ -3,7 +3,7 @@ Tensorflow implementation of [Curriculum Adaptive Sampling for Extreme Data Imba
 
 ## Preprocessing Tutorial
 * [convert_luna_to_npy](https://github.com/taki0112/CASED-Tensorflow/blob/master/preprocessing/README/convert_luna_to_npy_README.md)
-* [Make patch](https://github.com/taki0112/CASED-Tensorflow/blob/master/preprocessing/README/h5py_patch_README.md)
+* [create patch](https://github.com/taki0112/CASED-Tensorflow/blob/master/preprocessing/README/h5py_patch_README.md)
 
 ## Usage for preprocessing
 ```python
