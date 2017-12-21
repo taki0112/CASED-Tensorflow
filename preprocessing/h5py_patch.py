@@ -24,7 +24,6 @@ def indices_to_one_hot(data, nb_classes):
 
 
 def normalize(image):
-    # https://www.kaggle.com/gzuidhof/full-preprocessing-tutorial
     maxHU = 400.
     minHU = -1000.
 
@@ -200,7 +199,6 @@ def process_image(image_path, annotations, nodule, non_nodule, nodule_label, non
     nodule_list = []
     nodule_label_list = []
     for i in indices:
-        # https://github.com/gzuidhof/luna16/blob/master/src/data_processing/create_xy_xz_yz_CARTESIUS.py
         row = annotations.iloc[i]
         world_coords = np.array([row.coordX, row.coordY, row.coordZ])
 
@@ -247,8 +245,7 @@ for i in range(10):
     idx = 1
     flag = 1
     save_path = '/data2/jhkim/LUNA16/patch/SH/'
-    # https://www.safaribooksonline.com/library/view/python-and-hdf5/9781491944981/ch04.html
-    # https://stackoverflow.com/questions/20928136/input-and-output-numpy-arrays-to-h5py
+    
     for image_path in image_paths:
         print('subset' + str(i) + ' / ' + str(idx) + ' / ' + str(len(image_paths)))
         process_image(image_path, annotations, nodule, non_nodule, nodule_label, non_nodule_label)
