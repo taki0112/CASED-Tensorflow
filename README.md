@@ -2,8 +2,8 @@
 Tensorflow implementation of [Curriculum Adaptive Sampling for Extreme Data Imbalance](https://www.researchgate.net/publication/319461093_CASED_Curriculum_Adaptive_Sampling_for_Extreme_Data_Imbalance) with **multi GPU** using [*LUNA16*](https://luna16.grand-challenge.org/)
 
 ## Preprocessing Tutorial
-* [convert_luna_to_npy](https://github.com/taki0112/CASED-Tensorflow/blob/master/preprocessing/README/convert_luna_to_npy_README.md)
-* [create patch](https://github.com/taki0112/CASED-Tensorflow/blob/master/preprocessing/README/h5py_patch_README.md)
+* [convert_luna_to_npy](/preprocessing/README/convert_luna_to_npy_README.md)
+* [create patch](preprocessing/README/h5py_patch_README.md)
 
 ## Usage for preprocessing
 ```python
