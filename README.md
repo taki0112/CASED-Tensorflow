@@ -2,7 +2,7 @@
 Tensorflow implementation of [Curriculum Adaptive Sampling for Extreme Data Imbalance](https://www.researchgate.net/publication/319461093_CASED_Curriculum_Adaptive_Sampling_for_Extreme_Data_Imbalance) with **multi GPU** using [*LUNA16*](https://luna16.grand-challenge.org/)
 
 ## Tutorial
-* [Preprocessing](https://github.com/taki0112/CASED-Tensorflow/blob/master/Preprocessing.md)
+* [Preprocessing_1](https://github.com/taki0112/CASED-Tensorflow/blob/master/Preprocessing_1.md)
 
 ## Usage for preprocessing
 ```python
