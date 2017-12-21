@@ -4,7 +4,7 @@
 ```
 
 ## convert_luna_to_npy.py
-### read_csv
+### 1. read_csv
 * This is the code that reads `annotations.csv`
 * `series_uid` is **key** and **value** is the `coordinate value (x, y, z order) and diameter`
 ```python
@@ -29,7 +29,7 @@ def read_csv(filename):
     return annotations_dict
 ```
 
-### load_itk_image
+### 2. load_itk_image
 * This code converts `mhd file` to a `numpy array`
 * The direction axis is set to `[z, y, x]`
 ```python
@@ -43,7 +43,7 @@ def load_itk_image(filename):
     return numpyImage, numpyOrigin, numpySpacing    
 ```
 
-### resampling
+### 3. resampling
 * If you load all the luna16 data and make it into a numpy array... You do `resample`, `normalize` and `zero_centering`
 * Each mhd file has different distances between the x, y, and z axes. (You might think this is because the machines that took the pictures are different)
 * `resample` is to match the distances between the x, y, and z axes in all mhd files. 
@@ -62,7 +62,7 @@ def resample(image, org_spacing, new_spacing=OUTPUT_SPACING):
     return image, new_spacing
 ```
 
-### normalize
+### 4. normalize
 * In `normalize`, Please check the `Hounsfield_Unit` in the table below.
 * In LUNA16 nodule detection, uses `-1000 ~ 400`
 
@@ -79,7 +79,7 @@ def normalize_planes(npzarray):
     return npzarray
 ```
 
-### zero centering
+### 5. zero centering
 * `zero center` makes the average of the images zero. If you do this, your training will be better. (But sometimes it is better not to do it.)
 * In LUNA16, use `0.25`
 ```python
@@ -90,7 +90,7 @@ def zero_center(image):
     return image
 ```
 
-### create label
+### 6. create label
 * This is the code that masks the `nodule`
 * *example*
 <div align="center">
