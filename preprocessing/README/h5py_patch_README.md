@@ -38,7 +38,7 @@
 * `stride` = It means how many spaces to move around the nodule
 * It is possible to stride `8 times(4 * 2)` in the ***x, y, z, xy, xz, yz, and xyz*** directions respectively. (*Then, get 56 patch*)
 * Therefore, It will be make the patch per single nodule point is 56 + 1 = `57`
-* `stride`=8, `move`=4
+* `stride` = 8, `move` = 4
 
 ![stride](/assests/stride.png)
 
