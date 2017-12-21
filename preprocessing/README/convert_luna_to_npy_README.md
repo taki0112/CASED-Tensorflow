@@ -6,7 +6,8 @@
 ## convert_luna_to_npy.py
 ### 1. read_csv
 * This is the code that reads `annotations.csv`
-* `series_uid` is **key** and **value** is the `coordinate value (x, y, z order) and diameter`
+* `series_uid` is **key**
+* **value** is the `coordinate value (x, y, z order) and diameter`
 ```python
 def read_csv(filename):
     lines = []
