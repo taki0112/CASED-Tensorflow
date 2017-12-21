@@ -61,7 +61,9 @@ def resample(image, org_spacing, new_spacing=OUTPUT_SPACING):
 
 * In `normalize`, Please check the `Hounsfield_Unit` in the table below.
 * In LUNA16 nodule detection, uses `-1000 ~ 400`
+
 ![Hounsfield_Unit](http://i.imgur.com/4rlyReh.png)
+
 ```python
 def normalize_planes(npzarray):
 
