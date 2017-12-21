@@ -20,11 +20,12 @@
     non_pad = image
     non_label_pad = label
 
-    non_pad = np.pad(non_pad, offset, 'constant', constant_values=0)
-    non_label_pad = np.pad(non_label_pad, offset, 'constant', constant_values=0)
+    non_pad = np.pad(non_pad, offset, 'constant', constant_values=np.min(non_pad))
+    non_label_pad = np.pad(non_label_pad, offset, 'constant', constant_values=np.min(non_label_pad))
 
-    image = np.pad(image, offset + (stride * move), 'constant', constant_values=0)
-    label = np.pad(label, offset + (stride * move), 'constant', constant_values=0)
+    image = np.pad(image, offset + (stride * move), 'constant', constant_values=np.min(image))
+    label = np.pad(label, offset + (stride * move), 'constant', constant_values=np.min(label))
+
 ```
 
 * The patch is ***centered on the nodule*** and then extracted.
