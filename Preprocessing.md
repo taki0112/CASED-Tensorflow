@@ -89,3 +89,8 @@ def zero_center(image):
 
     return image
 ```
+
+### create label
+* This is the code that masks the `nodule`
+* *example*
+
