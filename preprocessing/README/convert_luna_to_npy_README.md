@@ -44,6 +44,16 @@ def load_itk_image(filename):
     return numpyImage, numpyOrigin, numpySpacing    
 ```
 
+* If you want the direction axis to be `[x, y, z]`, use the this code
+```python
+def load_itk(filename):
+    itkimage = sitk.ReadImage(filename)
+    image = np.transpose(sitk.GetArrayFromImage(itkimage))
+    origin = np.array(itkimage.GetOrigin())
+    spacing = np.array(itkimage.GetSpacing())
+    return image, origin, spacing
+```
+
 ### 3. resampling
 * If you load all the luna16 data and make it into a numpy array... You do `resample`, `normalize` and `zero_centering`
 * Each mhd file has different distances between the x, y, and z axes. (You might think this is because the machines that took the pictures are different)
