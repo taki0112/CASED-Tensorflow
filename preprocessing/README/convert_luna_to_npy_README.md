@@ -143,4 +143,4 @@ def create_label(arr_shape, nodules, new_spacing, coord=False):
 * [h5py_patch](https://github.com/taki0112/CASED-Tensorflow/blob/master/preprocessing/README/h5py_patch_README.md)
 
 ## Author
-Junho Kim
+Junho Kim / [@Lunit](http://lunit.io/)
