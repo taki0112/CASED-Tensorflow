@@ -63,3 +63,6 @@ def world_2_voxel(world_coord, origin, spacing):
         hf.create_dataset('non_nodule', data=non_nodule[:], compression='lzf')
         hf.create_dataset('label_non_nodule', data=non_nodule_label[:], compression='lzf')
 ```
+
+## Author
+Junho Kim / [@Lunit](http://lunit.io/)
