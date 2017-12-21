@@ -93,4 +93,47 @@ def zero_center(image):
 ### create label
 * This is the code that masks the `nodule`
 * *example*
+<div align="center">
+   <img src="/assests/nodule.png" width="420">
+  <img src="/assests/nodule_label.png"  width="420">
+</div>
+```python
+def create_label(arr_shape, nodules, new_spacing, coord=False):
+    """
+        nodules = list of dict {'position', 'diameter'}
+    """
+    def _create_mask(arr_shape, position, diameter):
+
+        z_dim, y_dim, x_dim = arr_shape
+        z_pos, y_pos, x_pos = position
+
+        z,y,x = np.ogrid[-z_pos:z_dim-z_pos, -y_pos:y_dim-y_pos, -x_pos:x_dim-x_pos]
+        mask = z**2 + y**2 + x**2 <= int(diameter//2)**2
+
+        return mask
+
+    if coord:
+        label = []
+    else:
+        label = np.zeros(arr_shape, dtype='bool')
+
+    for nodule in nodules:
+        worldCoord = nodule['position']
+        worldCoord = np.asarray([worldCoord[2],worldCoord[1],worldCoord[0]])
+
+        # new_spacing came from resample
+        voxelCoord = compute_coord(worldCoord, origin, new_spacing)
+        voxelCoord = [int(i) for i in voxelCoord]
+
+        diameter = nodule['diameter']
+        diameter = diameter / new_spacing[1]
+
+        if coord:
+            label.append(voxelCoord + [diameter])
+        else:
+            mask = _create_mask(arr_shape, voxelCoord, diameter)
+            label = np.logical_or(label, mask)
+
+    return label
+```
 
