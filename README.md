@@ -4,6 +4,10 @@ Tensorflow implementation of [Curriculum Adaptive Sampling for Extreme Data Imba
 ## Preprocessing Tutorial
 * [convert_luna_to_npy](/preprocessing/README/convert_luna_to_npy_README.md)
 * [create patch](preprocessing/README/h5py_patch_README.md)
+```python
+ > all_in_one.py = convert_luna_to_npy + create_patch
+```
+
 
 ## Usage for preprocessing
 ```python
