@@ -67,6 +67,17 @@ def Snapshot(t, T, M, alpha_zero) :
 > Pixel Mean = 0.25
 ```
 
+### Data augmentation
+* Affine rotate
+```python
+-2 to 2 degree
+```
+
+* Scale
+```python
+0.9 to 1.1
+```
+
 ### Network Architecture
 ![network](./assests/network.JPG)
 
