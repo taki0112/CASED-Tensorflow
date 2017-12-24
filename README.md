@@ -68,7 +68,7 @@ def Snapshot(t, T, M, alpha_zero) :
 ```
 
 ### Data augmentation
-Not applied in code... If you want to do augmentation, see this [link](https://github.com/aleju/imgaug)
+If you want to do augmentation, see this [link](https://github.com/aleju/imgaug)
 
 * Affine rotate
 ```python
