@@ -152,9 +152,9 @@ class CASED(object) :
                 pad_list.append(pad_r)
 
 
-            image = np.pad(image, pad_width=[ [pad_list[0], pad_list[1]], [pad_list[2], pad_list[3]], [pad_list[4], pad_list[5]] ], mode='edge')
+            image = np.pad(image, pad_width=[ [pad_list[0], pad_list[1]], [pad_list[2], pad_list[3]], [pad_list[4], pad_list[5]] ], mode='constant', constant_values=np.min(image))
 
-            label = np.pad(label, pad_width=[ [pad_list[0], pad_list[1]], [pad_list[2], pad_list[3]], [pad_list[4], pad_list[5]] ], mode='edge')
+            label = np.pad(label, pad_width=[ [pad_list[0], pad_list[1]], [pad_list[2], pad_list[3]], [pad_list[4], pad_list[5]] ], mode='constant', constant_values=np.min(label))
 
             print('padding !')
             print(np.shape(image))
@@ -172,7 +172,7 @@ class CASED(object) :
                     y = None
                     for z_i in range(len_z):
                         scan = np.expand_dims(np.expand_dims(image_blocks[x_i, y_i, z_i], axis=-1), axis=0) # 1 72 72 72 1
-                        scan = np.pad(scan, pad_width=[[0, 0], [30, 30], [30, 30], [30, 30], [0, 0]], mode='edge')
+                        scan = np.pad(scan, pad_width=[[0, 0], [30, 30], [30, 30], [30, 30], [0, 0]],  mode='constant', constant_values=np.min(scan))
                         test_feed_dict = {
                             self.inputs: scan
                         }
