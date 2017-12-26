@@ -150,19 +150,12 @@ class CASED(object) :
         if could_load:
             if self.K_fold :
                 start_epoch = (int)(checkpoint_counter / (self.total_subset - 1))
-                if start_epoch == 0 :
-                    start_sub_n = checkpoint_counter - start_epoch * (self.total_subset - 1) + 1
-                else :
-                    start_sub_n = checkpoint_counter - start_epoch * (self.total_subset - 1)
+                start_sub_n = checkpoint_counter - start_epoch * (self.total_subset - 1) + 1
 
-                if start_sub_n <= 0 :
-                    start_sub_n = 0
             else :
                 start_epoch = (int)(checkpoint_counter / (self.total_subset))
                 start_sub_n = checkpoint_counter - start_epoch * (self.total_subset)
 
-                if start_sub_n <= 0 :
-                    start_sub_n = 0
             counter = checkpoint_counter
             print(" [*] Load SUCCESS")
         else:
