@@ -1,6 +1,7 @@
 from preprocessing.preprocess_utils import *
 from random import randint
 import h5py
+import numpy as np
 OUTPUT_SPACING = [1.25, 1.25, 1.25]
 patch_size = 68
 label_size = 8
@@ -81,11 +82,11 @@ if __name__=="__main__":
             non_pad = image
             non_label_pad = label
 
-            non_pad = np.pad(non_pad, offset, 'edge')
-            non_label_pad = np.pad(non_label_pad, offset, 'edge')
+            non_pad = np.pad(non_pad, offset, 'constant', constant_values=np.min(non_pad))
+            non_label_pad = np.pad(non_label_pad, offset, 'constant', constant_values=np.min(non_label_pad))
 
-            image = np.pad(image, offset + (stride * move), 'edge')
-            label = np.pad(label, offset + (stride * move), 'edge')
+            image = np.pad(image, offset + (stride * move), 'constant', constant_values=np.min(image))
+            label = np.pad(label, offset + (stride * move), 'constant', constant_values=np.min(label))
 
             nodule_list = []
             nodule_label_list = []
