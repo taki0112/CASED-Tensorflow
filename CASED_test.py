@@ -151,7 +151,7 @@ class CASED(object) :
                 pad_list.append(pad_l)
                 pad_list.append(pad_r)
 
-
+            # np.min padding
             image = np.pad(image, pad_width=[ [pad_list[0], pad_list[1]], [pad_list[2], pad_list[3]], [pad_list[4], pad_list[5]] ], mode='constant', constant_values=np.min(image))
 
             label = np.pad(label, pad_width=[ [pad_list[0], pad_list[1]], [pad_list[2], pad_list[3]], [pad_list[4], pad_list[5]] ], mode='constant', constant_values=np.min(label))
