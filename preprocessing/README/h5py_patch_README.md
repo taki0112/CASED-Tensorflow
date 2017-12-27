@@ -53,6 +53,25 @@ def world_2_voxel(world_coord, origin, spacing):
 ### 4. extract the patch that contains the nodule and any patches that are not included
 * the number of non-nodule patch = 3 * the number of nodule patch
 * For the label patch, resize the patch using `max-pooling`, since the output size of the network (U-net) is 8 * 8 * 8
+```python
+def get_patch(image, coords, offset, patch_list, patch_flag=True):
+    xyz = image[int(coords[0] - offset): int(coords[0] + offset), 
+                int(coords[1] - offset): int(coords[1] + offset),
+                int(coords[2] - offset): int(coords[2] + offset)]
+
+    if patch_flag:
+        output = np.expand_dims(xyz, axis=-1)
+    else: # label
+        # resize xyz
+        xyz = block_reduce(xyz, (9, 9, 9), np.max)
+        output = np.expand_dims(xyz, axis=-1)
+
+        output = indices_to_one_hot(output.astype(np.int32), 2)
+        output = np.reshape(output, (label_size, label_size, label_size, 2))
+        output = output.astype(np.float32)
+
+    patch_list.append(output)
+```
 
 ### 5. create the patch with h5py
 * See [link](https://www.safaribooksonline.com/library/view/python-and-hdf5/9781491944981/ch04.html) for reasons why I chose `lzf type`
