@@ -16,6 +16,8 @@
 ### 2. padding the image
 ```python
     offset = patch_size // 2
+    stride = 8
+    move = offset // stride
 
     non_pad = image
     non_label_pad = label
