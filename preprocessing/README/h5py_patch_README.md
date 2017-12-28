@@ -93,17 +93,17 @@ def get_patch(image, coords, offset, patch_list, patch_flag=True):
 ```python
 from multiprocessing import Pool
 
+def nodule_hf(idx):
+    with h5py.File(image_patch, 'r') as hf:
+        nodule = hf['nodule'][idx:idx + get_data_num]
+    return nodule
+
 process_num = 32
 get_data_num = 64
 
 with h5py.File(image_patch, 'r') as fin:
     nodule_range = range(0, len(fin['nodule']), get_data_num)
 
-def nodule_hf(idx):
-    with h5py.File(image_patch, 'r') as hf:
-        nodule = hf['nodule'][idx:idx + get_data_num]
-    return nodule
-    
 pool = Pool(processes = process_num)
 pool_nodule = pool.map(nodule_hf, nodule_range)
 pool.close()
