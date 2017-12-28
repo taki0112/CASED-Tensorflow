@@ -54,7 +54,9 @@ def world_2_voxel(world_coord, origin, spacing):
 
 ### 4. extract the patch that contains the nodule and any patches that are not included
 * the number of non-nodule patch = 3 * the number of nodule patch
-* For the label patch, resize the patch using `max-pooling`, since the output size of the network (U-net) is 8 * 8 * 8
+* For the label patch, resize the patch using `max-pooling` in `skimage`, since the output size of the network (U-net) is 8 * 8 * 8
+* Don't use `scipy.resize`... Because, if you use it, there is a phenomenon that the pixel value is 1 (True) disappears
+
 ```python
 def get_patch(image, coords, offset, patch_list, patch_flag=True):
     xyz = image[int(coords[0] - offset): int(coords[0] + offset), 
@@ -65,7 +67,7 @@ def get_patch(image, coords, offset, patch_list, patch_flag=True):
         output = np.expand_dims(xyz, axis=-1)
     else: # label
         # resize xyz
-        xyz = block_reduce(xyz, (9, 9, 9), np.max)
+        xyz = skimage.measure.block_reduce(xyz, (9, 9, 9), np.max)
         output = np.expand_dims(xyz, axis=-1)
 
         output = indices_to_one_hot(output.astype(np.int32), 2)
