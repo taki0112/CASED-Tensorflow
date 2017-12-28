@@ -99,12 +99,10 @@ get_data_num = 64
 def nodule_hf(idx):
     with h5py.File(image_patch, 'r') as hf:
         nodule = hf['nodule'][idx:idx + get_data_num]
-        # print(np.shape(nodule))
     return nodule
     
 pool = Pool(processes = process_num)
 pool_nodule = pool.map(nodule_hf, nodule_range)
-
 pool.close()
 
 nodule = []
