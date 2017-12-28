@@ -86,5 +86,28 @@ def get_patch(image, coords, offset, patch_list, patch_flag=True):
         hf.create_dataset('label_non_nodule', data=non_nodule_label[:], compression='lzf')
 ```
 
+### 6. data load
+* Use multiprocessing.Pool
+* `process_num` is good for exponentiation of 2.
+* If you want to know how many cpu you have available in Linux... `grep -c processor /proc/cpuinfo`
+```python
+from multiprocessing import Pool
+def nodule_hf(idx):
+    with h5py.File(file, 'r') as hf:
+        nodule = hf['nodule'][idx:idx + get_data_num]
+        # print(np.shape(nodule))
+    return nodule
+    
+pool = Pool(processes = process_num)
+pool_nodule = pool.map(nodule_hf, nodule_range)
+
+pool.close()
+
+nodule = []
+
+for p in pool_nodule :
+    nodule.extend(p)
+```
+
 ## Author
 Junho Kim / [@Lunit](http://lunit.io/)
