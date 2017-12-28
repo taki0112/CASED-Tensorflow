@@ -96,6 +96,9 @@ from multiprocessing import Pool
 process_num = 32
 get_data_num = 64
 
+with h5py.File(file, 'r') as fin:
+    nodule_range = range(0, len(fin['nodule']), get_data_num)
+
 def nodule_hf(idx):
     with h5py.File(image_patch, 'r') as hf:
         nodule = hf['nodule'][idx:idx + get_data_num]
