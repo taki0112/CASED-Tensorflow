@@ -92,8 +92,12 @@ def get_patch(image, coords, offset, patch_list, patch_flag=True):
 * If you want to know how many cpu you have available in Linux... `grep -c processor /proc/cpuinfo`
 ```python
 from multiprocessing import Pool
+
+process_num = 32
+get_data_num = 64
+
 def nodule_hf(idx):
-    with h5py.File(file, 'r') as hf:
+    with h5py.File(image_patch, 'r') as hf:
         nodule = hf['nodule'][idx:idx + get_data_num]
         # print(np.shape(nodule))
     return nodule
