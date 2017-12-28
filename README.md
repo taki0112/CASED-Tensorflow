@@ -85,6 +85,26 @@ If you want to do augmentation, see this [link](https://github.com/aleju/imgaug)
 
 ### Algorithm
 ![framework](./assests/framework.JPG)
+```python
+p_x = 1.0
+
+for i in iteration :
+    p = uniform(0,1)
+    
+    if p <= p_x :
+        g_n_index = np.random.choice(N, size=batch_size, replace=False)
+        batch_patch = nodule_patch[g_n_index]
+        batch_y = nodule_patch_y[g_n_index]
+    
+    else :
+        predictor_dict = Predictor(all_patch) # key = index, value = loss
+        g_r_index = nlargest(batch_size, predictor_dict, key=predictor_dict.get)
+        
+        batch_patch = all_patch[g_r_index]
+        batch_y = all_patch_y[g_r_index]
+    
+    p_x *= pow(1/M, 1/iteration)
+```
 
 ## Result
 ![result2](./assests/result2.JPG)
