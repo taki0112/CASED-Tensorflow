@@ -11,10 +11,12 @@ def conv_layer(x, channels, kernel=3, stride=1, activation='relu', padding='VALI
             return tf.layers.conv3d(inputs=x, filters=channels, kernel_size=kernel, kernel_initializer=he_init(),
                                     strides=stride, padding=padding, activation=relu)
 
-def deconv_layer(x, channels, kernel=4, stride=2, padding='SAME', layer_name='_deconv3d') :
+def deconv_layer(x, channels, kernel=4, stride=2, padding='VALID', layer_name='_deconv3d') :
     with tf.name_scope(layer_name) :
+        crop = 1
         x = tf.layers.conv3d_transpose(inputs=x, filters=channels, kernel_size=kernel, kernel_initializer=he_init(),
                                        strides=stride, padding=padding, use_bias=False)
+        x = x[:, crop:-crop, crop:-crop, crop:-crop, :]
         return x
 def flatten(x) :
     return tf.layers.flatten(x)

@@ -55,7 +55,7 @@ class CASED(object) :
             x = conv_layer(x, channels=256, kernel=3, stride=1, layer_name='conv4')
             x = conv_layer(x, channels=128, kernel=3, stride=1, layer_name='conv5')
 
-            x = deconv_layer(x, channels=128, kernel=4, stride=2,layer_name='deconv1')
+            x = deconv_layer(x, channels=128, kernel=4, stride=2, layer_name='deconv1')
             x = copy_crop(crop_layer=up_conv3, in_layer=x)
 
             x = conv_layer(x, channels=128, kernel=1, stride=1, layer_name='conv6')
