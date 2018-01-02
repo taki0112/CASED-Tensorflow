@@ -333,7 +333,7 @@ def nearest_prob(fp) :
 
 
 def create_exclude_mask(arr_shape, position, diameter):
-    x_dim, y_dim, z_dim = arr_shape
+    x_dim, y_dim, z_dim, _ = arr_shape
     x_pos, y_pos, z_pos = position
 
     x, y, z = np.ogrid[-x_pos:x_dim - x_pos, -y_pos:y_dim - y_pos, -z_pos:z_dim - z_pos]

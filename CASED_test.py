@@ -179,8 +179,12 @@ class CASED(object) :
 
                         logits = self.sess.run(
                             self.softmax_logits, feed_dict=test_feed_dict
-                        )
-                        logits = np.squeeze(np.argmax(logits, axis=-1), axis=0) # 72 72 72
+                        ) # [1, 72, 72, 72, 2]
+                        logits = np.squeeze(logits, axis=0) # [72,72,72,2]
+                        # logits = np.squeeze(np.argmax(logits, axis=-1), axis=0)
+                        """
+                        [1, 72, 72, 72, 2] -> [1, 72, 72, 72] -> [72,72,72]
+                        """
 
                         y = logits if y is None else np.concatenate((y, logits), axis=2)
 
@@ -206,8 +210,10 @@ class CASED(object) :
                     ex_diameter = 10.0
                 exclude_position = (ex[0], ex[1], ex[2])
                 exclude_mask = create_exclude_mask(result_scan.shape, exclude_position, ex_diameter )
-                result_scan = np.logical_and(result_scan, exclude_mask)
+                exclude_mask = np.expand_dims(exclude_mask, axis=-1)
+                exclude_mask = indices_to_one_hot(exclude_mask, 2)
 
+                result_scan = np.logical_and(result_scan, exclude_mask) # [72, 72, 72, 2]
             """
             coords = coords_dict[scan_name]
             cnt = 0
@@ -228,6 +234,8 @@ class CASED(object) :
                 cnt += 1
                 scan_num += 1
             """
+
+            label = indices_to_one_hot(label, 2)
 
             if sens_list is None :
                 sens_list = fp_per_scan(result_scan, label)
