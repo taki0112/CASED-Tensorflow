@@ -18,6 +18,7 @@ def deconv_layer(x, channels, kernel=4, stride=2, padding='VALID', layer_name='_
                                        strides=stride, padding=padding, use_bias=False)
         x = x[:, crop:-crop, crop:-crop, crop:-crop, :]
         return x
+
 def flatten(x) :
     return tf.layers.flatten(x)
 
