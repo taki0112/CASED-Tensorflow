@@ -7,6 +7,7 @@ from multiprocessing import Pool
 from sklearn.metrics import roc_curve, auc
 import matplotlib.pyplot as plt
 from matplotlib.ticker import  FixedFormatter
+import matplotlib
 
 
 seed = 0
@@ -50,6 +51,7 @@ def check_folder(log_dir):
 def nodule_hf(idx):
     with h5py.File(file, 'r') as hf:
         nodule = hf['nodule'][idx:idx + get_data_num]
+        # print(np.shape(nodule))
     return nodule
 
 
@@ -61,6 +63,7 @@ def non_nodule_hf(idx):
 def label_nodule_hf(idx):
     with h5py.File(file, 'r') as hf:
         nodule = hf['label_nodule'][idx:idx + get_data_num]
+        # print(np.shape(nodule))
     return nodule
 
 
@@ -90,6 +93,7 @@ def prepare_data(sub_n):
 
     pool.close()
 
+    # print(np.shape(nodule[0]))
     nodule = []
     non_nodule = []
 
@@ -110,6 +114,9 @@ def prepare_data(sub_n):
     non_nodule = np.asarray(non_nodule)
     nodule_y = np.asarray(nodule_y)
     non_nodule_y = np.asarray(non_nodule_y)
+
+    #print(np.shape(nodule_y))
+    #print(np.shape(non_nodule_y))
 
     all_y = np.concatenate([nodule_y, non_nodule_y], axis=0)
     all_patch = np.concatenate([nodule, non_nodule], axis=0)
@@ -148,6 +155,7 @@ def validation_data(sub_n) :
 
     pool.close()
 
+    # print(np.shape(nodule[0]))
     nodule = []
     non_nodule = []
 
@@ -201,6 +209,7 @@ def test_data(sub_n):
 
     pool.close()
 
+    # print(np.shape(nodule[0]))
     nodule = []
     non_nodule = []
 
@@ -236,10 +245,9 @@ def test_data(sub_n):
 
 
 def sensitivity(logits, labels):
-
-
     predictions = tf.argmax(logits, axis=-1)
     actuals = tf.argmax(labels, axis=-1)
+
 
     nodule_actuals = tf.ones_like(actuals)
     non_nodule_actuals = tf.zeros_like(actuals)
@@ -314,26 +322,8 @@ def indices_to_one_hot(data, nb_classes):
     targets = np.array(data).reshape(-1)
     return np.eye(nb_classes)[targets]
 
-def nearest_prob(fp) :
-    confidence = 0.95
-    z = (1.0 - confidence) / 2.0
-
-    fp_list = [0.125, 0.25, 0.5, 1, 2, 4, 8]
-
-    flag = True
-    for candidate_fp in fp_list :
-        if candidate_fp*(1-z) <= fp <= candidate_fp :
-            flag = False
-            return candidate_fp
-        else :
-            continue
-
-    if flag :
-        return 0
-
-
 def create_exclude_mask(arr_shape, position, diameter):
-    x_dim, y_dim, z_dim, _ = arr_shape
+    x_dim, y_dim, z_dim = arr_shape
     x_pos, y_pos, z_pos = position
 
     x, y, z = np.ogrid[-x_pos:x_dim - x_pos, -y_pos:y_dim - y_pos, -z_pos:z_dim - z_pos]
@@ -342,28 +332,27 @@ def create_exclude_mask(arr_shape, position, diameter):
     return mask
 
 def fp_per_scan(logit, label) :
-    fp_list = [0.125, 0.25, 0.5, 1, 2, 4, 8]
-    MIN_FROC = 0.125
-    MAX_FROC = 8
     logit = np.reshape(logit, -1)
     label = np.reshape(label, -1)
 
-    fpr, tpr, th = roc_curve(label, logit)
-    fps = fpr * logit.size
+    logit = logit[logit >= 0]
+    label = label[label >= 0]
 
-    fps_itp = np.linspace(MIN_FROC, MAX_FROC, num=64)
-    sens_itp = np.interp(fps_itp, fps, tpr)
+    logit = np.where(logit >= 1.0, logit-1, logit)
+    label = np.where(label >= 1.0, label-1, label)
 
-    sens_list = []
+    fpr, tpr, th = roc_curve(label, logit, pos_label=1.0)
+    negative_samples = np.count_nonzero(label == 0.0)
+    fps = fpr * negative_samples
 
-    for fp in fp_list :
-        sens = sens_itp[np.where(fps_itp == fp)[0][0]]
-        sens_list.append(sens)
+
     """
     mean_sens = np.mean(sens_list)
-    
+    matplotlib.use('Agg')
+
     ax = plt.gca()
     plt.plot(fps_itp, sens_itp)
+    # https://matplotlib.org/devdocs/api/_as_gen/matplotlib.pyplot.grid.html
     plt.xlim(MIN_FROC, MAX_FROC)
     plt.ylim(0, 1.1)
     plt.xlabel('Average number of false positives per scan')
@@ -381,7 +370,7 @@ def fp_per_scan(logit, label) :
     plt.tight_layout()
 
     # plt.show()
-    # plt.savefig('')
+    plt.savefig('result.png', bbox_inches=0, dpi=300)
     """
 
-    return np.asarray(sens_list)
+    return np.asarray(fps), np.asarray(tpr)

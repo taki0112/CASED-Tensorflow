@@ -5,8 +5,10 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 from skimage.util.shape import view_as_blocks as patch_blocks
 from math import ceil
-import numpy as np
-class CASED(object) :
+from skimage.measure import block_reduce
+
+
+class CASED(object):
     def __init__(self, sess, batch_size, checkpoint_dir, result_dir, log_dir):
         self.sess = sess
         self.dataset_name = 'LUNA16'
@@ -14,14 +16,14 @@ class CASED(object) :
         self.result_dir = result_dir
         self.log_dir = log_dir
         self.batch_size = batch_size
-        self.model_name = "CASED"     # name for checkpoint
+        self.model_name = "CASED"  # name for checkpoint
 
         self.c_dim = 1
-        self.y_dim = 2 # nodule ? or non_nodule ?
-        self.block_size = 72
+        self.y_dim = 2  # nodule ? or non_nodule ?
+        self.block_size = 68
 
     def cased_network(self, x, reuse=False, scope='CASED_NETWORK'):
-        with tf.variable_scope(scope, reuse=reuse) :
+        with tf.variable_scope(scope, reuse=reuse):
             x = conv_layer(x, channels=32, kernel=3, stride=1, layer_name='conv1')
             up_conv1 = conv_layer(x, channels=32, kernel=3, stride=1, layer_name='up_conv1')
 
@@ -40,7 +42,7 @@ class CASED(object) :
             x = conv_layer(x, channels=256, kernel=3, stride=1, layer_name='conv4')
             x = conv_layer(x, channels=128, kernel=3, stride=1, layer_name='conv5')
 
-            x = deconv_layer(x, channels=128, kernel=4, stride=2,layer_name='deconv1')
+            x = deconv_layer(x, channels=128, kernel=4, stride=2, layer_name='deconv1')
             x = copy_crop(crop_layer=up_conv3, in_layer=x)
 
             x = conv_layer(x, channels=128, kernel=1, stride=1, layer_name='conv6')
@@ -66,7 +68,7 @@ class CASED(object) :
 
     def build_model(self):
 
-        bs = self.batch_size
+        bs = None
         scan_dims = [None, None, None, self.c_dim]
         scan_y_dims = [None, None, None, self.y_dim]
 
@@ -83,7 +85,6 @@ class CASED(object) :
         self.correct_prediction = tf.equal(tf.argmax(self.softmax_logits, -1), tf.argmax(self.y, -1))
         self.accuracy = tf.reduce_mean(tf.cast(self.correct_prediction, tf.float32))
         self.sensitivity, self.fp_rate = sensitivity(labels=self.y, logits=self.softmax_logits)
-
 
         """ Summary """
 
@@ -111,30 +112,38 @@ class CASED(object) :
         else:
             print(" [!] Load failed...")
 
-        validation_sub_n = 0
+        validation_sub_n = 8
         subset_name = 'subset' + str(validation_sub_n)
+        print(subset_name)
         image_paths = glob.glob("/data/jhkim/LUNA16/original/subset" + str(validation_sub_n) + '/*.mhd')
         all_scan_num = len(image_paths)
-        sens_list = None
-        nan_num = 0
-        for scan in image_paths :
+        sens_list = []
+        fps_list = []
 
+        nan_num = 0
+        cnt = 1
+
+
+        MIN_FROC = 0.125
+        MAX_FROC = 8
+
+        for scan in image_paths:
+            print('{} / {}'.format(cnt, len(image_paths)))
             scan_name = os.path.split(scan)[1].replace('.mhd', '')
             scan_npy = '/data2/jhkim/npydata/' + subset_name + '/' + scan_name + '.npy'
             label_npy = '/data2/jhkim/npydata/' + subset_name + '/' + scan_name + '.label.npy'
 
             image = np.transpose(np.load(scan_npy))
             label = np.transpose(np.load(label_npy))
+            print(np.shape(image))
 
-            if np.count_nonzero(label) == 0 :
+            if np.count_nonzero(label) == 0:
                 nan_num += 1
+                cnt += 1
                 continue
 
-            print(np.shape(image))
-            print(np.shape(label))
-
             pad_list = []
-            for i in range(3) :
+            for i in range(3):
                 if np.shape(image)[i] % block_size == 0:
                     pad_l = 0
                     pad_r = pad_l
@@ -151,108 +160,120 @@ class CASED(object) :
                 pad_list.append(pad_l)
                 pad_list.append(pad_r)
 
-            # np.min padding
-            image = np.pad(image, pad_width=[ [pad_list[0], pad_list[1]], [pad_list[2], pad_list[3]], [pad_list[4], pad_list[5]] ], mode='constant', constant_values=np.min(image))
+            image = np.pad(image, pad_width=[[pad_list[0], pad_list[1]], [pad_list[2], pad_list[3]],
+                                             [pad_list[4], pad_list[5]]],
+                           mode='constant', constant_values=np.min(image))
 
-            label = np.pad(label, pad_width=[ [pad_list[0], pad_list[1]], [pad_list[2], pad_list[3]], [pad_list[4], pad_list[5]] ], mode='constant', constant_values=np.min(label))
+            label = np.pad(label, pad_width=[[pad_list[0], pad_list[1]], [pad_list[2], pad_list[3]],
+                                             [pad_list[4], pad_list[5]]],
+                           mode='constant', constant_values=np.min(label))
 
-            print('padding !')
-            print(np.shape(image))
-            print(np.shape(label))
+            with open('jh_exclude.pkl', 'rb') as f:
+                exclude_dict = pickle.load(f, encoding='bytes')
+
+            exclude_coords = exclude_dict[scan_name]
+            ex_mask = np.ones_like(image)
+            for ex in exclude_coords:
+                ex[0] = ex[0] + (pad_list[0] + pad_list[1]) // 2
+                ex[1] = ex[1] + (pad_list[2] + pad_list[3]) // 2
+                ex[2] = ex[2] + (pad_list[4] + pad_list[5]) // 2
+                ex_diameter = 0
+                if ex_diameter < 0.0:
+                    ex_diameter = 0
+                exclude_position = (ex[0], ex[1], ex[2])
+                exclude_mask = create_exclude_mask(image.shape, exclude_position, ex_diameter)
+                ex_mask = exclude_mask if ex_mask is None else np.logical_and(ex_mask, exclude_mask)
 
             image_blocks = patch_blocks(image, block_shape=(block_size, block_size, block_size))
+            label_blocks = patch_blocks(label, block_shape=(block_size, block_size, block_size))
+            ex_mask_blocks = patch_blocks(ex_mask, block_shape=(block_size, block_size, block_size))
+
             len_x = len(image_blocks)
             len_y = len(image_blocks[0])
             len_z = len(image_blocks[0, 0])
 
             result_scan = None
+            label_scan = None
+            ex_scan = None
             for x_i in range(len_x):
                 x = None
+                x_label = None
+                x_ex = None
                 for y_i in range(len_y):
                     y = None
+                    y_label = None
+                    y_ex = None
                     for z_i in range(len_z):
-                        scan = np.expand_dims(np.expand_dims(image_blocks[x_i, y_i, z_i], axis=-1), axis=0) # 1 72 72 72 1
-                        scan = np.pad(scan, pad_width=[[0, 0], [30, 30], [30, 30], [30, 30], [0, 0]],  mode='constant', constant_values=np.min(scan))
+                        scan = np.expand_dims(np.expand_dims(image_blocks[x_i, y_i, z_i], axis=-1), axis=0)  # 1 68 68 68 1
+                        logit_label = block_reduce(label_blocks[x_i, y_i, z_i], (9, 9, 9), np.max)
+                        logit_ex = block_reduce(ex_mask_blocks[x_i, y_i, z_i], (9, 9, 9), np.min)
+
                         test_feed_dict = {
                             self.inputs: scan
                         }
 
                         logits = self.sess.run(
                             self.softmax_logits, feed_dict=test_feed_dict
-                        ) # [1, 72, 72, 72, 2]
-                        logits = np.squeeze(logits, axis=0) # [72,72,72,2]
-                        # logits = np.squeeze(np.argmax(logits, axis=-1), axis=0)
+                        )  # [1, 68, 68, 68, 2]
+                        logits_ = np.squeeze(logits, axis=0)  # [68,68,68]
+                        logits = np.zeros(shape=(logits_.shape[0], logits_.shape[1], logits_.shape[2], 1))
+                        for x_i_, x_v in enumerate(logits_):
+                            for y_i_, y_v in enumerate(x_v):
+                                for z_i_, z_v in enumerate(y_v):
+                                    logits[x_i_, y_i_, z_i_] = z_v[1]
+                        logits = np.squeeze(logits, axis=-1)  # 68 68 68
+
                         """
                         [1, 72, 72, 72, 2] -> [1, 72, 72, 72] -> [72,72,72]
                         """
 
-                        y = logits if y is None else np.concatenate((y, logits), axis=2)
+                        y = logits if y is None else np.concatenate((y, logits), axis=2)  # z concat
+                        y_label = logit_label if y_label is None else np.concatenate((y_label, logit_label), axis=2)
+                        y_ex = logit_ex if y_ex is None else np.concatenate((y_ex, logit_ex), axis=2)
 
-                    x = y if x is None else np.concatenate((x, y), axis=1)
+                    x = y if x is None else np.concatenate((x, y), axis=1)  # y concat
+                    x_label = y_label if x_label is None else np.concatenate((x_label, y_label), axis=1)
+                    x_ex = y_ex if x_ex is None else np.concatenate((x_ex, y_ex), axis=1)
 
-                result_scan = x if result_scan is None else np.concatenate((result_scan, x), axis=0)
+                result_scan = x if result_scan is None else np.concatenate((result_scan, x), axis=0)  # x concat
+                label_scan = x_label if label_scan is None else np.concatenate((label_scan, x_label), axis=0)
+                ex_scan = x_ex if ex_scan is None else np.concatenate((ex_scan, x_ex), axis=0)
+            label = label_scan
+            ex_mask = ex_scan
             # print(result) # 3d original size
 
-            with open('include.pkl', 'rb') as f:
+            with open('jh.pkl', 'rb') as f:
                 coords_dict = pickle.load(f, encoding='bytes')
 
-            with open('exclude.pkl', 'rb') as f:
-                exclude_dict = pickle.load(f, encoding='bytes')
+            ex_mask = ex_mask.astype(np.float32)
+            label = label.astype(np.float32)
+            ex_mask = np.where(ex_mask == 0.0, -10, ex_mask)
 
-            exclude_coords = exclude_dict[scan_name]
+            result_scan = result_scan + ex_mask
+            label = label + ex_mask
 
-            for ex in exclude_coords :
-                ex[0] = ex[0] + (pad_list[0] + pad_list[1]) // 2
-                ex[1] = ex[1] + (pad_list[2] + pad_list[3]) // 2
-                ex[2] = ex[2] + (pad_list[4] + pad_list[5]) // 2
-                ex_diameter = ex[3]
-                if ex_diameter < 0.0 :
-                    ex_diameter = 10.0
-                exclude_position = (ex[0], ex[1], ex[2])
-                exclude_mask = create_exclude_mask(result_scan.shape, exclude_position, ex_diameter )
-                exclude_mask = np.expand_dims(exclude_mask, axis=-1)
-                exclude_mask = indices_to_one_hot(exclude_mask, 2)
-
-                result_scan = np.logical_and(result_scan, exclude_mask) # [72, 72, 72, 2]
-            """
-            coords = coords_dict[scan_name]
-            cnt = 0
-            for c in coords :
-                print('******** result ********')
-                print(np.shape(result_scan))
-                print(np.shape(label))
-                print(c)
-                x_coords = c[0] + (pad_list[0] + pad_list[1]) // 2
-                y_coords = c[1] + (pad_list[2] + pad_list[3]) // 2
-                z_coords = c[2] + (pad_list[4] + pad_list[5]) // 2
-                offset = 34
-                result_scan_img = result_scan[int(x_coords - offset): int(x_coords + offset), int(y_coords - offset):int(y_coords + offset), z_coords]
-                label_scan = label[int(x_coords - offset): int(x_coords + offset), int(y_coords - offset):int(y_coords + offset), z_coords]
-
-                plt.imsave('./image/test_{}_{}.png'.format(scan_num,cnt), result_scan_img, cmap=plt.cm.gray)
-                plt.imsave('./image/label_{}_{}.png'.format(scan_num,cnt), label_scan, cmap=plt.cm.gray)
+            if np.count_nonzero(label == 2.0) == 0:
+                nan_num += 1
                 cnt += 1
-                scan_num += 1
-            """
+                continue
+            cnt += 1
 
-            label = indices_to_one_hot(label, 2)
+            fps, tpr = fp_per_scan(result_scan, label)
 
-            if sens_list is None :
-                sens_list = fp_per_scan(result_scan, label)
-            else :
-                sens_list += fp_per_scan(result_scan, label)
+            fps_list.append(fps)
+            sens_list.append(tpr)
 
-        fp_list = [0.125, 0.25, 0.5, 1, 2, 4, 8]
-        sens_list /= (all_scan_num - nan_num)
-
-        for i in range(len(fp_list)) :
-            print('{} : {}'.format(fp_list[i], sens_list[i]))
-
-        print('Average sensitivity : {}'.format(np.mean(sens_list)))
-
-
-
-
+        fps_itp = np.linspace(MIN_FROC, MAX_FROC, num=10001)
+        sens_itp = None
+        for list_i in range(len(fps_list)):
+            fps_list[list_i] /= (all_scan_num - nan_num)
+            sens_list[list_i] /= (all_scan_num - nan_num)
+            if sens_itp is None:
+                sens_itp = np.interp(fps_itp, fps_list[list_i], sens_list[list_i])
+            else:
+                sens_itp += np.interp(fps_itp, fps_list[list_i], sens_list[list_i])
+        print(fps_itp)
+        print(sens_itp)
 
     @property
     def model_dir(self):
