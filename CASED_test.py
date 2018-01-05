@@ -177,9 +177,9 @@ class CASED(object):
                 ex[0] = ex[0] + (pad_list[0] + pad_list[1]) // 2
                 ex[1] = ex[1] + (pad_list[2] + pad_list[3]) // 2
                 ex[2] = ex[2] + (pad_list[4] + pad_list[5]) // 2
-                ex_diameter = 0
+                ex_diameter = ex[3]
                 if ex_diameter < 0.0:
-                    ex_diameter = 0
+                    ex_diameter = 10.0
                 exclude_position = (ex[0], ex[1], ex[2])
                 exclude_mask = create_exclude_mask(image.shape, exclude_position, ex_diameter)
                 ex_mask = exclude_mask if ex_mask is None else np.logical_and(ex_mask, exclude_mask)
